@@ -1,0 +1,176 @@
+GCD系列 之（一）：基本概念和Dispatch Queue
+参考学习https://www.dreamingwish.com/article/grand-central-dispatch-basic-1.html系列文章，貌似也是翻译自他处的。觉得非常完整，就自己搬运过来，备忘和分享。防止以后遇到问题， 想起来，但是又找不到的痛苦
+
+ 
+
+什么是GCD？
+
+Grand Central Dispatch或者GCD，是一套低层API，提供了一种新的方法来进行并发程序编写。从基本功能上讲，GCD有点像NSOperationQueue，他们都允许程序将任务切分为多个单一任务然后提交至工作队列来并发地或者串行地执行。GCD比之NSOpertionQueue更底层更高效，并且它不是Cocoa框架的一部分。
+
+除了代码的平行执行能力，GCD还提供高度集成的事件控制系统。可以设置句柄来响应文件描述符、mach ports（Mach port 用于 OS X上的进程间通讯）、进程、计时器、信号、用户生成事件。这些句柄通过GCD来并发执行。
+
+GCD的API很大程度上基于block，当然，GCD也可以脱离block来使用，比如使用传统c机制提供函数指针和上下文指针。实践证明，当配合block使用时，GCD非常简单易用且能发挥其最大能力。
+
+你可以在Mac上敲命令“man dispatch”来获取GCD的文档。
+
+为何使用?
+
+GCD提供很多超越传统多线程编程的优势：
+
+易用: GCD比之thread跟简单易用。由于GCD基于work unit而非像thread那样基于运算，所以GCD可以控制诸如等待任务结束、监视文件描述符、周期执行代码以及工作挂起等任务。基于block的血统导致它能极为简单得在不同代码作用域之间传递上下文。
+效率: GCD被实现得如此轻量和优雅，使得它在很多地方比之专门创建消耗资源的线程更实用且快速。这关系到易用性：导致GCD易用的原因有一部分在于你可以不用担心太多的效率问题而仅仅使用它就行了。
+性能: GCD自动根据系统负载来增减线程数量，这就减少了上下文切换以及增加了计算效率。
+Dispatch Objects
+
+尽管GCD是纯c语言的，但它被组建成面向对象的风格。GCD对象被称为dispatch object。Dispatch object像Cocoa对象一样是引用计数的。使用dispatch_release和dispatch_retain函数来操作dispatch object的引用计数来进行内存管理。但主意不像Cocoa对象，dispatch object并不参与垃圾回收系统，所以即使开启了GC，你也必须手动管理GCD对象的内存。
+
+Dispatch queues 和 dispatch sources（后面会介绍到）可以被挂起和恢复，可以有一个相关联的任意上下文指针，可以有一个相关联的任务完成触发函数。可以查阅“man dispatch_object”来获取这些功能的更多信息。
+
+Dispatch Queues
+
+GCD的基本概念就是dispatch queue。dispatch queue是一个对象，它可以接受任务，并将任务以先到先执行的顺序来执行。dispatch queue可以是并发的或串行的。并发任务会像NSOperationQueue那样基于系统负载来合适地并发进行，串行队列同一时间只执行单一任务。
+
+GCD中有三种队列类型：
+
+The main queue: 与主线程功能相同。实际上，提交至main queue的任务会在主线程中执行。main queue可以调用dispatch_get_main_queue()来获得。因为main queue是与主线程相关的，所以这是一个串行队列。
+Global queues: 全局队列是并发队列，并由整个进程共享。进程中存在三个全局队列：高、中（默认）、低三个优先级队列。可以调用dispatch_get_global_queue函数传入优先级来访问队列。
+用户队列: 用户队列 (GCD并不这样称呼这种队列, 但是没有一个特定的名字来形容这种队列，所以我们称其为用户队列) 是用函数 dispatch_queue_create 创建的队列. 这些队列是串行的。正因为如此，它们可以用来完成同步机制, 有点像传统线程中的mutex。
+创建队列
+
+要使用用户队列，我们首先得创建一个。调用函数dispatch_queue_create就行了。函数的第一个参数是一个标签，这纯是为了debug。Apple建议我们使用倒置域名来命名队列，比如“com.dreamingwish.subsystem.task”。这些名字会在崩溃日志中被显示出来，也可以被调试器调用，这在调试中会很有用。第二个参数目前还不支持，传入NULL就行了。
+
+提交 Job
+
+向一个队列提交Job很简单：调用dispatch_async函数，传入一个队列和一个block。队列会在轮到这个block执行时执行这个block的代码。下面的例子是一个在后台执行一个巨长的任务：
+
+复制代码
+    //1.提交 Job
+                                            //优先级为Default
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //global_queue会在轮到这个block执行时执行这里的代码
+        [self goDoSomethingLongAndInvolved];
+        NSLog(@"Done doing something long and involved");
+    });
+复制代码
+ 
+
+dispatch_async 函数会立即返回, block会在后台异步执行。 所以后面的代码跟block里面的代码的执行顺序不确定
+
+当然，通常，任务完成时简单地NSLog个消息不是个事儿。在典型的Cocoa程序中，你很有可能希望在任务完成时更新界面，这就意味着需要在主线程中执行一些代码。你可以简单地完成这个任务——使用嵌套的dispatch，在外层中执行后台任务，在内层中将任务dispatch到main queue：
+
+复制代码
+    //2.使用嵌套的dispatch，异步抛任务给后台执行，后台异步执行完任务之后，dispatch回到main queue，执行更新UI
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //异步执行操作序列
+        [self goDoSomethingLongAndInvolved];
+        
+        //异步执行完任务之后需要回到main_queue做UI页面更新等等
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //
+            [self.sumLabel setText:[NSString stringWithFormat:@"%ld",self.sum]];
+        });
+    });
+复制代码
+dispatch_sync，同步执行，等待block中的代码执行完成并返回，然后执行接下来的任务。用 __block类型修饰符，可以用来从执行中的block获取一个值。例如，你可能有一段代码异步抛到后台去执行，而它需要从界面控制层获取一个值。那么你可以使用dispatch_sync在异步操作中暂停一下，然后做完这个同步操作，取到UI上的值，然后再进行异步操作的接下来代码序列：
+
+复制代码
+#pragma mark - 适合异步抛给后台做的事情
+-(void)goDoSomethingLongAndInvolved{
+    NSInteger  sum = 0;
+    for (int i = 0; i<50000; i++) {
+        sum = sum + i;
+    }
+    
+    //3.dispatch_sync同步操作  将同步操作放在异步抛给后台执行的代码中，就可以，先等这个同步操作执行完之后，再接着进行下面的异步操作序列
+//这个有阻塞了后台的线程
+
+    __block NSString *stringValue;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        //获取主线程里的UI中的Label的值，累加上Label的值
+        stringValue = self.sumLabel.text;
+        NSLog(@"实现累加上次结果的功能");
+    });
+    
+    sum = sum + stringValue.integerValue;
+    self.sum = sum;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+复制代码
+上面的效果也可以这样实现：
+
+复制代码
+ //用嵌套的block来中止后台线程，然后从主线程中获取值，然后再将后期处理提交至后台线程：
+ dispatch_queue_t bgQueue = myQueue;
+ dispatch_async(dispatch_get_main_queue(), ^{
+ NSString *stringValue = sumLabel.text;
+ dispatch_async(bgQueue, ^{
+ // use stringValue in the background now
+ });
+ });
+ //取决于你的需求，myQueue可以是用户队列也可以使全局队列。
+复制代码
+不再使用锁（Lock）
+
+用户队列可以用于替代锁来完成同步机制。在传统多线程编程中，你可能有一个对象要被多个线程使用，你需要一个锁来保护这个对象：
+
+    NSLock *lock;
+访问代码会像这样：
+复制代码
+- (id)something
+{
+    id localSomething;
+    [lock lock];
+    localSomething = [[something retain] autorelease];
+    [lock unlock];
+    return localSomething;
+}
+ 
+- (void)setSomething:(id)newSomething
+{
+    [lock lock];
+    if(newSomething != something)
+    {
+        [something release];
+        something = [newSomething retain];
+        [self updateSomethingCaches];
+    }
+    [lock unlock];
+}
+复制代码
+使用GCD，可以使用queue来替代锁：
+
+    dispatch_queue_t queue;
+要用于同步机制，queue必须是一个用户队列(从OS X v10.7和iOS 4.3开始，还必须指定为DISPATCH_QUEUE_SERIAL)，而非全局队列，所以使用dispatch_queue_create初始化一个。然后可以用dispatch_async 或者 dispatch_sync将共享数据的访问代码封装起来：
+
+复制代码
+- (id)something
+{
+    __block id localSomething;
+    dispatch_sync(queue, ^{
+        localSomething = [something retain];
+    });
+    return [localSomething autorelease];
+}
+ 
+- (void)setSomething:(id)newSomething
+{
+    dispatch_async(queue, ^{
+        if(newSomething != something)
+        {
+            [something release];
+            something = [newSomething retain];
+            [self updateSomethingCaches];
+        }
+    });
+}
+复制代码
+使用GCD途径有几个好处：
+
+平行计算: 注意在第二个版本的代码中， -setSomething:是怎么使用dispatch_async的。调用 -setSomething:会立即返回，然后这一大堆工作会在后台执行。如果updateSomethingCaches是一个很费时费力的任务，且调用者将要进行一项处理器高负荷任务，那么这样做会很棒。
+安全: 使用GCD，我们就不可能意外写出具有不成对Lock的代码。在常规Lock代码中，我们很可能在解锁之前让代码返回了。使用GCD，队列通常持续运行，你必将归还控制权。
+控制: 使用GCD我们可以挂起和恢复dispatch queue，而这是基于锁的方法所不能实现的。我们还可以将一个用户队列指向另一个dspatch queue，使得这个用户队列继承那个dispatch queue的属性。使用这种方法，队列的优先级可以被调整——通过将该队列指向一个不同的全局队列，若有必要的话，这个队列甚至可以被用来在主线程上执行代码。
+集成: GCD的事件系统与dispatch queue相集成。对象需要使用的任何事件或者计时器都可以从该对象的队列中指向，使得这些句柄可以自动在该队列上执行，从而使得句柄可以与对象自动同步。
