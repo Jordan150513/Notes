@@ -178,8 +178,54 @@ CoreAnimation动画执行
 4、栈：一般由编译器操作，会存放一些局部变量，等。
 5、堆：一般由程序员管理，比如alloc申请内存，一般的对象都在堆区。（链表
 
+35、
+strong：
+weak：
+
+weak和strong不同的是：当一个对象不再有strong类型的指针指向它的时候 它会被释放  ，即使还有weak型指针指向它。
+一旦最后一个strong型指针离去 ，这个对象将被释放，所有剩余的weak型指针都将被清除。
+
+可能有个例子形容是妥当的。
+
+想象我们的对象是一条狗，狗想要跑掉（被释放）。
+
+strong型指针就像是栓住的狗。只要你用牵绳挂住狗，狗就不会跑掉。如果有5个人牵着一条狗（5个strong型指针指向1个对象），除非5个牵绳都脱落 ，否着狗是不会跑掉的。
+
+weak型指针就像是一个小孩指着狗喊到：“看！一只狗在那” 只要狗一直被栓着，小孩就能看到狗，（weak指针）会一直指向它。只要狗的牵绳脱落，狗就会跑掉，不管有多少小孩在看着它。
+
+只要最后一个strong型指针不再指向对象，那么对象就会被释放，同时所有的weak型指针都将会被清除。
 
 
+
+copy：建立一个索引计数为1的对象，然后释放旧对象。对NSString。对NSString 
+
+
+retain：释放旧的对象，将旧对象的值赋予输入对象，再提高输入对象的索引计数为1 。对其他NSObject和其子类 
+
+
+copy和retain的区别：
+
+copy其实是建立了一个相同的对象，而retain不是；
+
+copy是内容拷贝，retain是指针拷贝；
+
+copy是内容的拷贝 ,对于像NSString,的确是这样，但是如果拷贝的是NSArray这时只是copy了指向array中相对应元素的指针.这便是所谓的"浅复制"。
+
+
+
+assign： 简单赋值，不更改索引计数（Reference Counting）。对基础数据类型 （NSInteger，CGFloat）和C数据类型（int, float, double, char, 等等）
+unsafe_unretain：
+autoreleaseing：
+
+
+
+__block和__weak修饰符的区别：
+
+__block不管是ARC还是MRC模式下都可以使用，可以修饰对象，还可以修饰基本数据类型。
+
+__weak只能在ARC模式下使用，也只能修饰对象（NSString），不能修饰基本数据类型（int）。
+
+__block对象可以在block中被重新赋值，__weak不可以。
 
 
 
