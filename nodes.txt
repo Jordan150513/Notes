@@ -273,4 +273,12 @@ __block对象可以在block中被重新赋值，__weak不可以。
 如果分类中声明了一个属性，那么分类只会生成这个属性的set、get方法声明，也就是不会有实现。
 但是扩展不可以？？？不可以什么？？？不可以生成属性的set get方法
 
-
+Charles实现对Https进行抓包，使用的原理就是中间人技术（man-in-the-middle）中间人技术（man-in-the-middle）：
+
+
+
+
+
+
+
+
