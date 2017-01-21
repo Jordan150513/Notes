@@ -314,10 +314,94 @@ NSURLSession可以设置三种配置信息，分别通过调用三个累方法�
 39、断点续传
 
 
-40、
+40、各种锁汇总：
+
+1、NSLock
+遵循NSLocking协议
+
+lock消息
+unlock消息
+
+连续锁两次会死锁，不能正常，多次的要用递归锁
+
+2、NSRecursiveLock
+可以被一个线程多次获得，而不会引起死锁
+故名思议，是在递归中用的，不会引起死锁失效
+
+3、NSCondition
+算是同步锁
+可以实现不同线程的调度
+一个线程被某一个条件所阻塞，直到另一个线程满足该条件从而发送信号给该线程使得该线程可以正确的执行。
+发送信号之后，解锁开锁。
+
+4、NSConditionLock
+NSConditionLock 对象所定义的互斥锁可以在使得在某个条件下进行锁定和解锁。
+和 NSCondition 很像，但实现方式是不同的。
+两个线程需要特定顺序执行的时候，例如生产者消费者模型，则可以使用 NSConditionLock 。当生产者执行执行的时候，消费者可以通过特定的条件获得锁，当生产者完成执行的时候，它将解锁该锁，然后把锁的条件设置成唤醒消费者线程的条件。锁定和解锁的调用可以随意组合，lock 和 unlockWithCondition: 配合使用 lockWhenCondition: 和 unlock 配合使用。
+
+- (void)producer {
+    while (YES) {
+        [self.conditionLock lock];
+        NSLog(@"have something");
+        self.count++;
+        [self.conditionLock unlockWithCondition:1];
+    }
+}
+
+- (void)consumer {
+    while (YES) {
+        [self.conditionLock lockWhenCondition:1];
+        NSLog(@"use something");
+        self.count--;
+        [self.conditionLock unlockWithCondition:0];
+    }
+}
+
+5、pthread_mutex
+互斥锁是一种超级易用的互斥锁，使用的时候，只需要初始化一个 pthread_mutex_t 用 pthread_mutex_lock 来锁定 pthread_mutex_unlock 来解锁，当使用完成后，记得调用 pthread_mutex_destroy 来销毁锁。
+
+6、pthread_rwlock
+
+读写锁，在对文件进行操作的时候，写操作是排他的，一旦有多个线程对同一个文件进行写操作，后果不可估量，但读是可以的，多个线程读取时没有问题的。
+
+当读写锁被一个线程以读模式占用的时候，写操作的其他线程会被阻塞，读操作的其他线程还可以继续进行。
+当读写锁被一个线程以写模式占用的时候，写操作的其他线程会被阻塞，读操作的其他线程也被阻塞。
+
+7、POSIX Conditions
+POSIX 条件锁需要互斥锁和条件两项来实现，虽然看起来没什么关系，但在运行时中，互斥锁将会与条件结合起来。线程将被一个互斥和条件结合的信号来唤醒。
+
+首先初始化条件和互斥锁，当 ready_to_go 为 flase 的时候，进入循环，然后线程将会被挂起，直到另一个线程将 ready_to_go 设置为 true 的时候，并且发送信号的时候，该线程会才被唤醒。
+
+8、OSSpinLock
+自旋锁，和互斥锁类似，都是为了保证线程安全的锁。但二者的区别是不一样的，对于互斥锁，当一个线程获得这个锁之后，其他想要获得此锁的线程将会被阻塞，直到该锁被释放。但自选锁不一样，当一个线程获得锁之后，其他线程将会一直循环在哪里查看是否该锁被释放。所以，此锁比较适用于锁的持有者保存时间较短的情况下。
+YY大神有
+
+9、os_unfair_lock
+iOS 10新出的解决自选锁失效的问题
+
+10、dispatch_semaphore
+信号量机制实现锁，等待信号，和发送信号，正如前边所说的看门人一样，当有多个线程进行访问的时候，只要有一个获得了信号，其他线程的就必须等待该信号释放。
+
+11、@synchronized
+一个便捷的创建互斥锁的方式，它做了其他互斥锁所做的所有的事情。
 
 
+应当针对不同的操作使用不同的锁：
 
+1、当进行文件读写的时候，使用 pthread_rwlock 较好，文件读写通常会消耗大量资源，而使用互斥锁同时读文件的时候会阻塞其他读文件线程，而 pthread_rwlock 不会。
+
+2、当性能要求较高时候，可以使用 pthread_mutex 或者 dispath_semaphore，由于 OSSpinLock 不能很好的保证线程安全，而在只有在 iOS10 中才有 os_unfair_lock ，所以，前两个是比较好的选择。既可以保证速度，又可以保证线程安全。
+
+3、对于 NSLock 及其子类，速度来说 NSLock < NSCondition < NSRecursiveLock < NSConditionLock 。
+
+
+41、生产者消费者
+
+42、NSCoreData
+
+43、其他的本地化
+
+44、
 
 
 
