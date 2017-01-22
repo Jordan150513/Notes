@@ -409,13 +409,17 @@ C语言的问题
 
 46、swift的小demo
 
-47、SDwebimage的源码
-
 48、哈希碰撞解决方法：
 1、线性的，往后推到下一个空的位置
 2、非线性的，再一次哈希
 3、链地址，在这个位置放置一个链表，放置哈西之后存在该位置的元素
 4、建立一个公共溢出区，放置这些，这个没有印象啦
+
+
+47、SDwebimage的源码复习
+
+SDWebImageManager
+SDWebImageDownloader
 
 
 
