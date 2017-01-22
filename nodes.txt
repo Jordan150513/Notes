@@ -422,5 +422,22 @@ SDWebImageManager
 SDWebImageDownloader
 
 
+SD失效的问题可能解决方案：
+
+1、有可能是图片的url地址不对，有可能浏览器可以打开，但是这个地址浏览器是做了处理的，所以浏览器能打开。
+
+2、如果图片地址是Http，那么就需要关闭ATS。
+
+ATS (App Transport Security)
+
+新特性要求App内访问的网络必须使用HTTPS协议，
+
+我们这里只是说明一下如何关闭该特性,让其可以访问http开头的网址.
+
+关闭很简单,打开项目中的info.plist文件,在其中添加一个字典类型的项目App Transport Security Settings,然后在其中添加一个key:Allow Arbitrary Loads,其值为YES,
+
+3、在关闭了ATS还不行的时候，你就要看看你的项目target版本，是不是设置的iOS 10最新版本。要降一降，并且关闭ATS，应该就差不多了。
+
+
 
 
