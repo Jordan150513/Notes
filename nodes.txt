@@ -436,7 +436,100 @@ ATS (App Transport Security)
 
 关闭很简单,打开项目中的info.plist文件,在其中添加一个字典类型的项目App Transport Security Settings,然后在其中添加一个key:Allow Arbitrary Loads,其值为YES,
 
-3、在关闭了ATS还不行的时候，你就要看看你的项目target版本，是不是设置的iOS 10最新版本。要降一降，并且关闭ATS，应该就差不多了。
+
+- (void)sd_setImageWithURL:(NSURL *)url placeholderImage:(UIImage *)placeholder options:(SDWebImageOptions)options progress:(SDWebImageDownloaderProgressBlock)progressBlock completed:(SDWebImageCompletionBlock)completedBlock 
+
+有全能初始化方法（designated initializer）的概念，这个方法也就相当于是全能操作方法，所有的方法最后都会调用这个方法，都会集中到这个方法中执行
+
+1、方法中先进行了一个关联
+static char imageURLKey;
+将传过来的url 设置成imageURLKey的value，由于imageURLKey是指向char类型的一个指针，所以是& imageURLKey，value是url。
+
+2、placeholder有的话，先设置上placeholder图片
+
+3、然后对非空的url进行图片的请求，交给了单例的SDWebImageManager，还有相应的SDWebImageOperation协议，以及相应的协议方法
+
+id <SDWebImageOperation> operation 
+协议中有唯一的
+- (void)cancel;
+方法
+
+SDWebImageManager
+中的方法
+- (id <SDWebImageOperation>)downloadImageWithURL:(NSURL *)url
+                                         options:(SDWebImageOptions)options
+                                        progress:(SDWebImageDownloaderProgressBlock)progressBlock
+                                       completed:(SDWebImageCompletionWithFinishedBlock)completedBlock {
+
+里面还有一个self.failedURLs数组，所有的失败的url都会放里面，这个数组作为公共资源，需要考虑线程安全，所以用 @synchronized (self.failedURLs) {进行了加锁操作来访问和修改，这是对数据请求进行的优化，对于失败的url的数据请求进项了改进，不会一直请求失败的url占用资源。
+
+5、然后对于正常的数据请求：
+
+添加进入 runningOperations 之中。
+
+还有一个重要的类SDWebImageCombinedOperation
+
+@property (strong, nonatomic) NSOperation *cacheOperation;
+
+cacheOperation是NSOperation
+
+
+
+
+designate 
+ | BrE ˈdɛzɪɡnət, AmE ˈdɛzɪɡnət, ˈdɛzɪɡˌneɪt |
+formal (appointed)受委派而尚未上任的 shòu wěipài ér shàngwèi shàngrèn de (elected)已当选而尚未就职的 yǐ dāngxuǎn ér shàngwèi jiùzhí de
+prime minister designate
+新当选而尚未上任的首相
+
+
+http://www.jianshu.com/p/4191017c8b39
+SD总结：
+SDWebImageAllowInvalidSSLCertificates 允许使用无效的SSL证书，主要用于测试目的，在正式环境中慎用
+SDWebImageHighPriority 优先下载
+SDWebImageDelayPlaceholder 等待下载完成后再显示占位图片，延迟显示占位图片
+SDWebImageTransformAnimatedImage 改变动画形象
+SDWebImageAvoidAutoSetImage 下载完成后手动设置图片，默认是下载完成后自动放到ImageView上
+
+options 枚举：
+
+1、SDWebImageRetryFailed 失败后重试， 默认如果下载失败,这个url会被加入黑名单并且不会尝试再次下载,设置这个枚举会阻止把失败的url加入黑名单，不断尝试重新下载
+
+2、SDWebImageLowPriority 延迟下载， 默认情况下,图片会在交互发生的时候下载(例如你滑动tableview的时候),这个枚举会禁止这个特性,导致的结果就是在scrollview减速的时候才会开始下载(也就是你滑动的时候scrollview不下载,你手从屏幕上移走,scrollview开始减速的时候才会开始下载图片)
+
+3、SDWebImageCacheMemoryOnly 只在内存缓存
+
+4、SDWebImageProgressiveDownload 渐进式下载,显示的图像是逐步在下载
+
+很重要
+5、SDWebImageRefreshCached 刷新缓存，有时本地图片更新后与服务器没有同步一致时可以使用（例如更新头像），专门处理相同url，但不同image的情况的
+原因：默认情况下，SDWebImage会忽略Header中的缓存设置，将图片以url为key进行保存，url与图片是一一对应关系。所以请求同一个url时，SDWebImage会从缓存中取得图片。一般的情况下用此方法可以满足我们的应用要求，但是如果你请求同一个url，而这张图片在服务器端更新了，本地客户端再次请求时还是会返回缓存中的旧图片，例如加载头像类经常更新的图片时，就会出现头像不能更新的问题，由于url与图片一一对应，一种解决的办法是改变部分url地址方式实现更新，不过这种方法操作起来很复杂， 另一种将第三个参数设置为SDWebImageRefreshCached就可以实现图片更新操作了。
+
+
+
+6、SDWebImageContinueInBackground 启动后台下载，app进入后台后继续下载
+
+7、SDWebImageHandleCookies 处理存储在NSHTTPCookieStore中的cookie
+NSMutableURLRequest.HTTPShouldHandleCookies = YES;
+
+8、SDWebImageAllowInvalidSSLCertificates 允许使用无效的SSL证书，主要用于测试目的，在正式环境中慎用
+
+9、SDWebImageHighPriority 优先下载
+
+10、SDWebImageDelayPlaceholder 等待下载完成后再显示占位图片，延迟显示占位图片
+
+11、SDWebImageTransformAnimatedImage 改变动画形象
+
+12、SDWebImageAvoidAutoSetImage 下载完成后手动设置图片，默认是下载完成后自动放到ImageView上
+
+
+48、https
+
+
+
+
+
+
 
 
 
