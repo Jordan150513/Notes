@@ -525,8 +525,48 @@ NSMutableURLRequest.HTTPShouldHandleCookies = YES;
 
 48、https
 
+2017年1月24日—————————————————————————
+
+49、遇到的一个问题的结局：
+https验证证书的问题
+问题描述：web页面有一个动态gif的表情一直不能成功显示出来，
+
+<img src=“https://img2.soufun.com/bbsv2/face/em016.gif”>
+
+用NSUrlSession请求之后，错误信息是这个：
+
+Error Domain=NSURLErrorDomain Code=-1202 "此服务器的证书无效。您可能正在连接到一个伪装成“img2.soufun.com”的服务器，这会威胁到您的机密信息的安全。" UserInfo={NSURLErrorFailingURLPeerTrustErrorKey=<SecTrustRef: 0x608000116020>, NSLocalizedRecoverySuggestion=您仍要连接此服务器吗？, _kCFStreamErrorDomainKey=3, _kCFStreamErrorCodeKey=-9843, NSErrorPeerCertificateChainKey=(
+    "<cert(0x7ffbba8ec000) s: *.cdn.myqcloud.com i: Symantec Class 3 Secure Server CA - G4>",
+    "<cert(0x7ffbba8cc000) s: Symantec Class 3 Secure Server CA - G4 i: VeriSign Class 3 Public Primary Certification Authority - G5>",
+    "<cert(0x7ffbba8eca00) s: VeriSign Class 3 Public Primary Certification Authority - G5 i: Class 3 Public Primary Certification Authority>",
+    "<cert(0x7ffbba8cc800) s: Class 3 Public Primary Certification Authority i: Class 3 Public Primary Certification Authority>"
+), NSUnderlyingError=0x61800024c900 {Error Domain=kCFErrorDomainCFNetwork Code=-1202 "(null)" UserInfo={_kCFStreamPropertySSLClientCertificateState=0, kCFStreamPropertySSLPeerTrust=<SecTrustRef: 0x608000116020>, _kCFNetworkCFStreamSSLErrorOriginalValue=-9843, _kCFStreamErrorDomainKey=3, _kCFStreamErrorCodeKey=-9843, kCFStreamPropertySSLPeerCertificates=(
+    "<cert(0x7ffbba8ec000) s: *.cdn.myqcloud.com i: Symantec Class 3 Secure Server CA - G4>",
+    "<cert(0x7ffbba8cc000) s: Symantec Class 3 Secure Server CA - G4 i: VeriSign Class 3 Public Primary Certification Authority - G5>",
+    "<cert(0x7ffbba8eca00) s: VeriSign Class 3 Public Primary Certification Authority - G5 i: Class 3 Public Primary Certification Authority>",
+    "<cert(0x7ffbba8cc800) s: Class 3 Public Primary Certification Authority i: Class 3 Public Primary Certification Authority>"
+)}}, NSLocalizedDescription=此服务器的证书无效。您可能正在连接到一个伪装成“img2.soufun.com”的服务器，这会威胁到您的机密信息的安全。, NSErrorFailingURLKey=https://img2.soufun.com/bbsv2/face/em016.gif, NSErrorFailingURLStringKey=https://img2.soufun.com/bbsv2/face/em016.gif, NSErrorClientCertificateStateKey=0}
+
+是https客户端需要验证这个域名的自签名证书的问题，
+
+后查实，项目中的图片的域名需要进行收敛操作，只有将域名进行收敛操作之后，相应的域名的站点才有相应的证书，收敛表情上传之前的表情的url即可。相应的域名受凉犯法也根据需求扩充了一下。
+
+还有我新加入的头像也显示不正常，猜测也是这个问题。
 
 
+1月23日 MT有关问题总结：
+
+问题总结，
+1、有关推送的
+2、有关weak原理的
+3、加分隔符的
+4、快排
+5、load 和 initlizer 分别做什么工作。
+6、swizzling
+7、实现能力
+
+自己太大意了，最基础的都没有做好，希望自己认识自己，改正不足的地方。
+感谢MT，感谢我的朋友。感谢一直陪伴我的CC，我会努力的。
 
 
 
