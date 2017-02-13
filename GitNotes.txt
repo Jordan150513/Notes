@@ -1,0 +1,11 @@
+My Git Notes 2017.1.13
+1.Rename file
+ 500 和
+ 535+536+537指令是等效的，都实现了重命名
+
+  500  git mv nodes.txt notes.txt
+
+  535  mv notes.txt DailyNotes.txt
+  536  git rm notes.txt
+  537  git add DailyNotes.txt
+ 
