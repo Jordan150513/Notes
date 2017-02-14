@@ -9,6 +9,8 @@ Rename file
   535  mv notes.txt DailyNotes.txt
   536  git rm notes.txt
   537  git add DailyNotes.txt
+其中
+mv命令是move的缩写，可以用来移动文件或者将文件改名（move (rename) files
 
 2.
 set editor for the git commit
