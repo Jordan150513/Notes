@@ -41,6 +41,11 @@ git log XXfileName:指定文件的log 历史记录更名不会识别，只会展
 git log --follow XXfileName:在日志中回溯找到文件相关联的整个历史记录，更名前后都会有。
 
 6.
+git flow使用规范化示例
+
+7、进行git rebase操作的探究
+
+
 
 
 
