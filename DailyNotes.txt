@@ -1,4 +1,29 @@
 每天一个问题
+
+
+-1.
+消息的发送实现：
+对一个实例发送消息的时候，会在该实例对应的类的 methodLists中查找
+对一个类发送消息的时候，会在该类的MetaClass的methodLists中查找
+
+每一个实例的isa指针，指向自己的class
+每一个类的isa指针，指向自己的meta class
+
+消息的转发实现：如何动态的确定消息的发送？？？
+[receiver message]
+会转换成
+msd_send(receiver,selector)
+如果receiver不响应message消息，则会去父类查找，父类还不响应，继续去父类查找，如果一直查找到NSObject还不响应，则会进入消息动态处理流程。
+
+消息动态处理流程：
+
+
+
+
+
+
+
+
 1、[super init]的作用超类完成自己的初始化工作
 
 http://www.jianshu.com/p/9b36e1b636d8
@@ -592,4 +617,4 @@ img src的路径就有问题
 自己太大意了，最基础的都没有做好，希望自己认识自己，改正不足的地方。
 感谢MT，感谢我的朋友。感谢一直陪伴我的CC，我会努力的。
 
-
+
