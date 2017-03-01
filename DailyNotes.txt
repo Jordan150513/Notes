@@ -1,4 +1,23 @@
 每天一个问题
+
+2月28日
+
+参考：http://blog.leichunfeng.com/blog/2015/06/26/objective-c-associated-objects-implementation-principle/
+结合源码，看项目中的实现原理
+
+陌陌T：
+1、关联属性的生命周期问题
+什么时候被释放
+
+什么时候被移除
+
+2、关联对象被存储在什么地方，是不是被存放在被关联对象本身的内存中
+
+
+
+
+
+
 2月20日
 小龙猫 陌陌T
 
