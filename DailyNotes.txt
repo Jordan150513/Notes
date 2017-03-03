@@ -1,5 +1,13 @@
 每天一个问题
 
+3月2日
+锁的应用的举例：
+非递归锁 再上锁之后再上锁，就会不能正常使用出错。递归锁 可以 层层递归上锁。
+1、代码源码上的例子
+类初始化的时候 +initialize，设计到对类的两个字段的更改，对类的 CLS_INITIALIZED 和 CLS_INITIALIZING 的修改，全局的 monitor_t类型的 classInitLock 锁就是用来同步对这两个字段的更改操作。保证其不会死锁。其他的线程都会等这个信号释放，只有这个信号释放了，才能做任何的消息发送，在初始化完成的信号释放之前，这些线程都会被挂起等待资源。
+
+2、业务逻辑上的例子：
+
 2月28日
 
 参考：http://blog.leichunfeng.com/blog/2015/06/26/objective-c-associated-objects-implementation-principle/
@@ -7,13 +15,13 @@
 
 陌陌T：
 1、关联属性的生命周期问题
-什么时候被释放
+什么时候被释放 什么时候被移除
+如果是copy的，那么在代码块执行完之后，就会被放入自动释放池中，会被释放掉 指针置为nil。当前所在的分类生命周期要结束的时候 会销毁这个分类的时候，这个分类所关联的 retain策略的属性将会被移除 然后被置为nil，释放。
 
-什么时候被移除
 
 2、关联对象被存储在什么地方，是不是被存放在被关联对象本身的内存中
 
-
+不是存放在关联类的本身内存之后，是又开辟了一个内存，好像是一个关联对应表，用来存储关联的属性。
 
 
 
@@ -23,14 +31,40 @@
 
 1、点击事件的响应
 一个是事件的分发 一个是响应链的实现
+见博客随笔内容：http://www.cnblogs.com/Jordandan/p/6483835.html
+期间 两个重要的方法：
+- (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
+
+ - (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event
+
+响应事件的处理呢？事件的分发，如何调用最终的事件响应方法？？？？这是不是就牵涉到了消息的转发机制？
+
+
+
 
 2、constant * 和 * constant
+见demo内容
+
+constant *：const在 * 的左边 是同一种情况 通过指针是不能改变指针所指向的变量的值的
+也就是不能通过指针改变指针所指向的变量的值，但是可以通过变量a自己改变变量的值
+
+ * constant：
+指针不能变，也就是指针自己的值不能变，也就是指针的指向不能变
+
 
 3、ARC和MRC的区别，以及ARC怎么实现的，ARC如何知道怎么加retain release？
+参考文章：http://bugly.qq.com/bbs/forum.php?mod=viewthread&tid=712  对ARC MRC的理解
+https://gold.xitu.io/post/584fe4762f301e00573cafc6
+第二个关于 自动释放的原理 还没有掌握
+
+ARC（自动引用计数），无需我们自己显式持有（retain）和释放（release）对象，ARC通过对对像加上所有权修饰符（__strong等），编译器通过对象的所有权修饰符将会自动键入引用计数管理（根据所有权修饰符自动键入retain、release、autorelease）
+
+把这段话copy进来是 要学会 如何去规范的表达一个问题的原因和答案 回答要规范正规化 不能太口头 随意。
 
 4、assign 和weak 的区别
 assign：用来修饰基本的数据类型，不会置为nil，可能会指向一个不明确的地址空间
 weak：用来修饰对象类型，若引用，当对象释放的时候，其属性也会置为nil，是安全的，不会有野指针，也就是不会指针指向一个不明确的地址空间
+
 
 5、sdwebimage的实现原理
 
