@@ -1,4 +1,76 @@
 每天一个问题
+3月8日
+2、
+先好好想一想，想清楚了 再去动手做，二超经常这样跟我说 MT面试的时候，也是给我的中肯的提示，可见 我真的需要 遇到问题的时候，先好好想一想，想清楚了，再动手去做。没有想清楚就去做，会乱糟糟。
+
+1、要知道Podfile.lock的作用，先要看看Podfile.lock是啥，里面有啥，才能知道他的作用。
+首先，我们先来看看 AsyncDisplayKitCollectionView Demo中的Podfile文件中的内容
+ cat Podfile.lock
+PODS:
+  - AsyncDisplayKit (2.1):
+    - AsyncDisplayKit/PINRemoteImage (= 2.1)
+  - AsyncDisplayKit/Core (2.1)
+  - AsyncDisplayKit/PINRemoteImage (2.1):
+    - AsyncDisplayKit/Core
+    - PINRemoteImage/iOS (= 3.0.0-beta.7)
+    - PINRemoteImage/PINCache
+  - PINCache (3.0.1-beta.2):
+    - PINCache/Arc-exception-safe (= 3.0.1-beta.2)
+    - PINCache/Core (= 3.0.1-beta.2)
+  - PINCache/Arc-exception-safe (3.0.1-beta.2):
+    - PINCache/Core
+  - PINCache/Core (3.0.1-beta.2)
+  - PINRemoteImage/Core (3.0.0-beta.7)
+  - PINRemoteImage/iOS (3.0.0-beta.7):
+    - PINRemoteImage/Core
+  - PINRemoteImage/PINCache (3.0.0-beta.7):
+    - PINCache (= 3.0.1-beta.2)
+    - PINRemoteImage/Core
+
+DEPENDENCIES:
+  - AsyncDisplayKit
+
+SPEC CHECKSUMS:
+  AsyncDisplayKit: 28de788f9d6ec573be7662f0fe8931e656357e93
+  PINCache: 6d273a6e0754bd26e3f12a38a90dde73cc6a42b2
+  PINRemoteImage: ff63baf185088530db6cfa41cb665e2b5126b5c3
+
+PODFILE CHECKSUM: d1264bf0434b7a26df33e64d1d416cb1d2a8ef90
+
+COCOAPODS: 1.2.0
+QiaoDandandeiMac:AsyncDisplayKitCollectionView qiaodandan$ 
+ 首先，里面有 导入的各个库的版本信息 还有指明的依赖 以及specification（标准规格）checksum 检查说明 
+以及 Podfile checksum 唯一的哈希值
+
+所以 总结一下说，podfile里面的东西就是记录了三方库的版本信息 以及依赖的库的版本信息为了实现稳定 或者是不被未知 的更改产生错误，比如说两个并发去pod update 可能最终的库的版本 会跟podfile.lock里面记载的不一样，所以 我觉得之所以叫做podfile.lock 可能增删改的时候 都会上锁 保持唯一写。
+
+
+3月7日
+1、突然想起来一个问题 podfile.lock 存在的意义是什么 有什么作用？
+2、AsyncDisplayKit 三方库的使用 实现 原理 View 和 Layer的区别  
+
+
+
+
+
+3月6日
+1、View和Layer的关系：
+常见的 UIView 和 CALayer 的关系：
+	View 持有 Layer 用于显示，View 中大部分显示属性实际是从 Layer 映射而来；
+	Layer 的 delegate 在这里是 View，当其属性改变、动画产生时，View 能够得到通知。
+	UIView 和 CALayer 不是线程安全的，并且只能在主线程创建、访问和销毁。
+
+2、比较有意义的一个问题 或者是事情 APP的性能问题，流畅度问题 三方asynchronous 
+三方：
+
+AsyncDisplayKit的原理 效果 其中有上段  说道 View 和 Layer的关系
+
+
+
+
+
+
+
 
 3月2日
 锁的应用的举例：
