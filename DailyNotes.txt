@@ -1,4 +1,16 @@
 每天一个问题
+3月9日
+
+1、JsonModel的实现 实现原理是什么 三方内部 各个负责什么 做什么工作
+    核心就是用class_copyPropertyList得到类的属性列表，在遍历列表，用property_getAttributes得到每个属性的类型，最后用kvc，接可以得到所有的值。
+
+使用的比较关键的方法
+objc_property_t *properties = class_copyPropertyList(class, &propertyCount);
+property_getName(property); // 获取属性的名字
+property_getAttributes(property); // 获取属性的属性
+2、
+
+
 3月8日
 2、
 先好好想一想，想清楚了 再去动手做，二超经常这样跟我说 MT面试的时候，也是给我的中肯的提示，可见 我真的需要 遇到问题的时候，先好好想一想，想清楚了，再动手去做。没有想清楚就去做，会乱糟糟。
