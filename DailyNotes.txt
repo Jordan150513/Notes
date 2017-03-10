@@ -1,13 +1,78 @@
 每天一个问题
+3月10日
+带着问题去学习，感觉会效率更加好一些
+加油 
+根据这个 带着这个去学习：
+http://blog.sunnyxx.com/2015/07/04/ios-interview/
+
+生活苦难 你才更要努力学习 努力做好自己 把自己变得更好一点 更强一点
+
+1、@property 后面可以有哪些修饰符？
+	noatomic/atomic strong/weak/assign/copy 指定setter getter 
+
+2、什么情况使用 weak 关键字，相比 assign 有什么不同？
+  	弱引用 非拥有关系 用来修饰NSObject对象 assign针对的是基本数据类型 NSInter Float等
+assign修饰的对象，在释放之后，并不会置为nil，指针指向还在，也就是野指针，对象是在堆上申请的，当下次用到这个地址的时候，就会崩溃了
+为什么assign修饰基本数据类型，因为基本数据类型是在栈里面的 栈的控件管理 是由系统自行处理，释放或者分配，不会造成野指针。不会崩溃。
+weak 在对象被释放之后，会置为nil，是安全的，不会造成野指针。
+
+3、怎么用 copy 关键字？
+	是用来修饰NSString类型的 会使引用计数加1，
+Strong会使两个指针 指向同一个地址
+copy会在内存里拷贝一份数据 两个指针 指向不同的地址
+
+没有解决
+4、这个写法会出什么问题： @property (copy) NSMutableArray *array;
+	将NSMutableArray 声明成了copy修饰的特性的 类的实例 对NSMutableArray 类型的array 不是拥有的关系。
+是又拷贝了一份 又用一个指针指向先拷贝的这一份，就会出现 之前那个指针指向的再去操作 就会被释放了 或者 数据不一致？？这个回答可以吗？准确不？
+
+没有解决 
+5、如何让自己的类用 copy 修饰符？如何重写带 copy 关键字的 setter？
+	copy修饰的属性的setter方法的实现 MRC的实现方式？??
+	@property（atomic,copy）NSString * stringC;
+	-(void)setStringC:(NSString *)string{
+	        [string retain];
+		[_string release];
+		_string = [string copy]; // 这里不对了  忘记了 retain新值 释放旧值 赋值新值？？？
+	}
+
+更加进一步
+6、@property 的本质是什么？ivar、getter、setter 是如何生成并添加到这个类中的
+	声明 成员属性 在内存管理中的存储策略 iva 是实例变量 _变量名字 
+
+实例变量 和 属性有什么区别？
+
+7、@protocol 和 category 中如何使用 @property
+8、runtime 如何实现 weak 属性
+
+今天就告一段落 弄好这8个问题 把这8个问题在源码中找到答案
+
+今天就先告一段落 有点累了 先看看下面的问题 看看其他的
+
+
 3月9日
 
 1、JsonModel的实现 实现原理是什么 三方内部 各个负责什么 做什么工作
-    核心就是用class_copyPropertyList得到类的属性列表，在遍历列表，用property_getAttributes得到每个属性的类型，最后用kvc，接可以得到所有的值。
+    核心就是用class_copyPropertyList得到类的属性列表，再遍历列表，
+对每一个属性：
+property_getName(property); 获取model类的每一个成员属性的名字
+用property_getAttributes得到每个成员属性的属性的类型，
+然后 存储在JSONModel中的 JSONModelClassProperty* p 中
+
+最后用kvc，接可以得到所有的值。
 
 使用的比较关键的方法
 objc_property_t *properties = class_copyPropertyList(class, &propertyCount);
 property_getName(property); // 获取属性的名字
 property_getAttributes(property); // 获取属性的属性
+
+
+主要实现 在JSONModel.m中 除了这个 还有比较重要的几个对象类
+JSONKeyMapper 主要做啥？
+JSONModelClassProperty 自定义的属性类型
+/** Block, which takes in a property name and converts it to the corresponding JSON key name */
+这个block 把一个属性名字 转换成的相应的 JSON key
+@property (readonly, nonatomic) JSONModelKeyMapBlock modelToJSONKeyBlock;
 2、
 
 
