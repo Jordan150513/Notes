@@ -1,4 +1,53 @@
 每天一个问题
+
+3月13日
+LH DD 题：
+1、通知中心的原理
+2、算法121abccba找出字符串中最长的回文数
+3、犯人喝毒酒逻辑题
+4、网络请求缓存设计web
+5、为什么category可以添加方法不能添加成员变量
+6、热更新替代方案一 不是苹果不让用了么？
+7、autoreleasepool的使用场景
+8、sel和imp的区别
+9、http多次请求会建立几个tcp连接
+10、meta class是什么 它的作用是什么？
+11、imageNamed：对象什么时候释放
+12、super.class打印
+13、main函数之前 程序做了什么
+14、如何设定一个指定线程数目的线程池
+
+
+BD T：
+1、流量监控怎么做？
+2、动画
+3、基础和原理
+
+
+3月13日
+1、代码规范的问题：
+
+a. 注意 不要将驼峰命名法和下划线命名法 混合使用 要规范使用
+b.如果方法表示让对象执行一个动作，使用动词打头来命名，注意不要使用 do，does 这种多余的关键字，动词本身的暗示就足够了。
+c.方法中不要用 with 来连接两个参数: withAge: 应当换为age:
+d.初始化方法的 全能初始化方法的 规范，所有的初始化方法最终都是通过调用全能初始化方法实现的。其他的初始化方法的参数是全能初始化方法的子集。
+e.枚举的定义 建议使用 NS_ENUM 和 NS_OPTIONS 宏来定义枚举类型，例如：
+//定义一个枚举 枚举的名字是 CYLSex 执行枚举的类型是 NSInteger
+typedef NS_ENUM(NSInteger, CYLSex) {
+    CYLSexMan,
+    CYLSexWoman
+};
+f.要用NSInter 而不是int 用CGFloat 而不是float，要用NSFoundation框架的东西，不要直接使用。
+g.拒绝中英文混合使用
+h.不管是MVC 还是MVVP 。业务逻辑放在业务逻辑应该的地方，比如说控制器里面，不要放在对象类中，比如说，不要把登陆实现方法写在model
+中。
+
+
+先总结这么多 ，以后再慢慢加
+
+
+
+
 3月10日
 带着问题去学习，感觉会效率更加好一些
 加油 
@@ -12,20 +61,35 @@ http://blog.sunnyxx.com/2015/07/04/ios-interview/
 
 2、什么情况使用 weak 关键字，相比 assign 有什么不同？
 	特点：weak和assign 既不保留新值，也不释放旧值
-  	弱引用 非拥有关系 用来修饰NSObject对象 assign针对的是基本数据类型 NSInter Float等
-assign修饰的对象，在释放之后，并不会置为nil，指针指向还在，也就是野指针，对象是在堆上申请的，当下次用到这个地址的时候，就会崩溃了
-为什么assign修饰基本数据类型，因为基本数据类型是在栈里面的 栈的控件管理 是由系统自行处理，释放或者分配，不会造成野指针。不会崩溃。
-weak 在对象被释放之后，会置为nil，是安全的，不会造成野指针。
+  	weak 关键字 非拥有关系 用来修饰NSObject对象 assign针对的是基本数据类型 NSInter Float等
+assign修饰的基本数据类型对象，在释放之后，并不会置为nil，但是基本数据类型是在栈中分配的存储空间，栈的空间管理，是由系统自行处理，释放或者分配，不会造成野指针。不会崩溃。weak修饰的对象是在堆上申请的，对象释放的时候，会被置为nil。如果没有被置为nil就是一个野指针，还指向堆中的某个地方，当下次用到堆中这个地址的时候，就会崩溃了，weak 在对象被释放之后，会置为nil，是安全的，不会造成野指针。不会引起崩溃。
 
 3、怎么用 copy 关键字？
 	是用来修饰NSString类型的 会使引用计数加1，
 Strong会使两个指针 指向同一个地址
 copy会在内存里拷贝一份数据 两个指针 指向不同的地址
+NSString用copy，经常用copy的特质来保护其封装性，NSString NSDictionary NSArray经常使用copy来修饰属性，是因为他们有对应的Mutable类型，为了确保来赋值的时候，有可能是赋给子类mutable，所以为了防止发生意外的改变内容，拷贝一份不可变的字符串，确保字符串中的值不会在对象不知道的情况下 进行更改，也就是在set的时候进行了更改。
+
+在 MRC 中,方法内部的 block 是在栈区的,使用 copy 可以把它放到堆区.在 ARC 中写不写都行。
 
 没有解决
 4、这个写法会出什么问题： @property (copy) NSMutableArray *array;
 	将NSMutableArray 声明成了copy修饰的特性的 类的实例 对NSMutableArray 类型的array 不是拥有的关系。
-是又拷贝了一份 又用一个指针指向先拷贝的这一份，就会出现 之前那个指针指向的再去操作 就会被释放了 或者 数据不一致？？这个回答可以吗？准确不？
+是又拷贝了一份 又用一个指针指向现在拷贝的这一份拷贝，拷贝的这一份是NSArrya，就会出现 之前那个指针指向的再去操作 就会被释放了 或者 数据不一致？？这个回答可以吗？准确不？不对 要说到 copy的是一个不可变的NSarray，所以，是不能记性操作的。
+
+两个问题：
+1、添加,删除,修改数组内的元素的时候,程序会因为找不到对应的方法而崩溃.因为 copy 就是复制一个不可变 NSArray 的对象；
+2、使用了 atomic 属性会严重影响性能 ；
+如果某属性不具备 nonatomic 特质，那它就是“原子的”(atomic)
+.h
+@property (nonatomic, copy) NSMutableArray *mutableArray;
+
+.m
+NSMutableArray *array = [NSMutableArray arrayWithObjects:@1,@2,nil];
+self.mutableArray = array;   //这里set方法，是copy了一个不可变的NSArray,所以接下来进行操作的时候，就会崩溃。
+[self.mutableArray removeObjectAtIndex:0];
+
+
 
 没有解决 
 5、如何让自己的类用 copy 修饰符？如何重写带 copy 关键字的 setter？
@@ -37,14 +101,73 @@ copy会在内存里拷贝一份数据 两个指针 指向不同的地址
 		_string = [string copy]; // 这里不对了  忘记了 retain新值 释放旧值 赋值新值？？？
 	}
 
+见这个https://dayon.gitbooks.io/-ios/content/chapter5.html  ——————————gegege—————我是分割线—————
+就是让自己的类有copy功能，
+让类遵守<NSCopying>协议，重写- (id)copyWithZone:(NSZone *)zone方法，如果还有其他的需要深度拷贝的内容，需要注意，采用深度拷贝 相应的数据集合。
+浅拷贝：
+- (id)copyWithZone:(NSZone *)zone {
+    CYLUser *copy = [[[self class] allocWithZone:zone] 
+                     initWithName:_name
+                                  age:_age
+                                  sex:_sex];
+    return copy;
+}
+
+浅拷贝拷贝(包括一个数据集合)：
+- (id)copyWithZone:(NSZone *)zone {
+    CYLUser *copy = [[[self class] allocWithZone:zone]
+                     initWithName:_name
+                     age:_age
+                     sex:_sex];
+    copy->_friends = [_friends mutableCopy];
+    return copy;
+}
+
+深拷贝：
+- (id)deepCopy {
+    CYLUser *copy = [[[self class] allocWithZone:zone]
+                     initWithName:_name
+                     age:_age
+                     sex:_sex];
+    copy->_friends = [[NSMutableSet alloc] initWithSet:_friends
+                                             copyItems:YES];
+    return copy;
+}
+
+
+关于 如何重写带copy关键的字的setter
+
+- (void)setName:(NSString *)name {
+    //[_name release];  //MRC
+    _name = [name copy];
+}
+
+这里有一点：
+- (void)setName:(NSString *)name {
+    if (_name != name) {
+        //[_name release];//MRC
+        _name = [name copy];
+    }
+}
+不要在 setter 里进行像 if(_obj != newObj) 这样的判断。（该观点参考链接： How To Write Cocoa Object Setters： Principle 3: Only Optimize After You Measure ）
+
+
+
 更加进一步
 6、@property 的本质是什么？ivar、getter、setter 是如何生成并添加到这个类中的
-	声明 成员属性 在内存管理中的存储策略 iva 是实例变量 _变量名字 
+	声明 成员属性 在类的存储管理中的存储策略 iva 是实例变量 _变量名字 
+实例变量存储在类的什么地方，属性存储在类的什么地方，属性跟实例变量有怎样的关系？
+
+@property的本质是声明了一个属性变量
 
 实例变量 和 属性有什么区别？
+有时候 ？？什么时候？属性变量会自动生成一个与属性变量对应的实例变量， 也就是下划线开头的变量，但是如果重写的set get方法，就不会自动为属性变量生成其对应的实例变量了。
+实例变量是在实例中以偏移量的方式存储的，有一个实例变量表，里面已偏移量的方式，存储着实例变量。
+属性呢？ 怎么存储在类的存储结构中？
 
 7、@protocol 和 category 中如何使用 @property
-8、runtime 如何实现 weak 属性
+通过关联属性 给category添加 使用 @property 增加属性
+8、runtime 如何实现 weak 属性  这个比较难 不好说 还是去源码里面找答案吧
 
 今天就告一段落 弄好这8个问题 把这8个问题在源码中找到答案
 
@@ -53,6 +176,7 @@ copy会在内存里拷贝一份数据 两个指针 指向不同的地址
 元类里面存着类方法列表 给类发消息 会通过这个类isa到元类的方法列表里取查找方法。
 当我们发送一个消息给一个NSObject对象时，这条消息会在对象的类对象方法列表里查找
 当我们发送一个消息给一个类时，这条消息会在类的Meta Class对象的方法列表里查找
+所以这个也就验证了 isa的指向 实例对象的isa指向了类 类的isa指向了其元类
 
 3月9日
 
