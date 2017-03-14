@@ -1,6 +1,9 @@
 每天一个问题
 
 3月14日
+
+添加了观察者 但是没有出发观察者的方法，为什么会这样的？原因是啥？
+
 参考网上大神总结的问题 我搬到这里学习
 问题：
 1、[※]@property中有哪些属性关键字？
@@ -141,8 +144,18 @@
     });
     NSLog(@"3");
 }
+我亲测运行报错了，这是为啥？？？
+
 
 37、[※※]addObserver:forKeyPath:options:context:各个参数的作用分别是什么，observer中需要实现哪个方法才能获得KVO回调？
+   addObserver:<#(nonnull NSObject *)#> forKeyPath:<#(nonnull NSString *)#> options:<#(NSKeyValueObservingOptions)#> context:<#(nullable void *)#>]
+    第一个参数：指明是给谁添加观察者
+    第二个参数： <#(nonnull NSString *)#> 指明keypath
+    第三个参数：NSKeyValueObservingOptions 有三个枚举值 initial new old
+    第四个参数： <#(nullable void *)#> context
+    context:需要传递的对象是一个(void *)类型的数据，这是一个C类型的对象，我们需要做的就是将id类型的对象转成C类型。
+观察者模式：
+
 
 38、[※※※]如何手动触发一个value的KVO
 
