@@ -1,4 +1,171 @@
 每天一个问题
+
+3月14日
+参考网上大神总结的问题 我搬到这里学习
+问题：
+1、[※]@property中有哪些属性关键字？
+	noatomic weak strong copy assign 
+
+2、[※]weak属性需要在dealloc中置nil么？
+	不需要, weak属性，在对象销毁的时候，weak属性会置为nil
+
+3、[※※]@synthesize和@dynamic分别有什么作用？
+	synthesize 指明属性对应的实例变量的名字 合成属性的实例变量
+	@dynamic 在编译器自动给属性添加 set get方法。
+	对不对？
+
+4、[※※※]ARC下，不显式指定任何属性关键字时，默认的关键字都有哪些？
+	没有指定 默认是atomic 默认的是strong 还是weak？？
+
+5、[※※※]用@property声明的NSString（或NSArray，NSDictionary）经常使用copy关键字，为什么？如果改用strong关键字，可能造成什么问题？
+	如果使用Strong，可能会有两个影响，一个是
+	Mutable是其子类，如果是赋值给了一个Mutabel的子类，子类不能进行相应的操作方法。
+
+6、[※※※]@synthesize合成实例变量的规则是什么？假如property名为foo，存在一个名为_foo的实例变量，那么还会自动合成新变量么？
+	不会吧？不确定 @synthesize 合成实例变量的规则
+
+7、[※※※※※]在有了自动合成属性实例变量之后，@synthesize还有哪些使用场景？
+	同步锁？
+
+8、[※※]objc中向一个nil对象发送消息将会发生什么？
+	是安全的不会崩溃
+
+9、[※※※]objc中向一个对象发送消息[obj foo]和objc_msgSend()函数之间有什么关系？
+	[obj foo]的本质是调用了objc_msgSend(obj，foo)
+
+10、[※※※]什么时候会报unrecognized selector的异常？
+	给一个对象发送消息，在该对象的方法表中（如果是实例方法，就在其类的方法表中找不到对应的方法，如果是类方法，就在元类的方法表中查找）找不到对应的消息。 牵涉到消息的转发机制。这里还不是很熟悉。
+
+11、[※※※※]一个objc对象如何进行内存布局？（考虑有父类的情况）
+	这个确实不知道，
+
+12、[※※※※]一个objc对象的isa的指针指向什么？有什么作用？
+	实例对象的isa指向它的类，类对象的isa指向其元类
+
+13、[※※※※]下面的代码输出什么？
+
+@implementation Son : Father
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        NSLog(@"%@", NSStringFromClass([self class]));
+        NSLog(@"%@", NSStringFromClass([super class]));
+    }
+    return self;
+}
+@end
+	输出：
+	TestDemo[541:332834] Son
+	TestDemo[541:332834] Son
+	这个应该怎么解释调用过程呢？？？
+
+14、[※※※※]runtime如何通过selector找到对应的IMP地址？（分别考虑类方法和实例方法）
+	类方法：
+	会通过类的isa指针到类的元类中的方法表(method_list中进行)查找，在method_list中存储的方法结构体中有IMP指针
+
+	实例方法：
+	会通过selector到实例对象isa指向的类方法表（method_list）中寻找对应的方法，映射对 key-value 找到对应的方法结构体重有IMP指针
+
+	这个需要到源码中找到相应的源码
+
+15、[※※※※]使用runtime Associate方法关联的对象，需要在主对象dealloc的时候释放么？
+	不需要，会在对象销毁的时候，会移除关联的对象，就被释放掉了。
+
+16、[※※※※※]objc中的类方法和实例方法有什么本质区别和联系？
+	类方法存储在元类中的方法列表里，通过类的isa到元类的方法列表里取查找
+	实例方法存储在类的方法列表里，通过实例的isa到类的方法列表里去查找
+
+17、[※※※※※]_objc_msgForward函数是做什么的，直接调用它将会发生什么？
+	消息转发，当前对象的方法列表里，没有对应的方法（发送的消息），就会调用。。。。后面就又不清楚了。不仅要清楚实现过程，还需要清楚源码的实现。
+
+18、[※※※※※]runtime如何实现weak变量的自动置nil？
+	那个方法叫什么来这 weak_clean_nolock（）
+
+19、[※※※※※]能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
+	不能向编译后得到的类中增加实例变量，但是可以向运行的类中，动态的增加属性，但是增加不了实例变量。
+
+20、[※※※]runloop和线程有什么关系？
+	一一对应的关系
+
+21、[※※※]runloop的mode作用是什么？
+	
+22、[※※※※]以+ scheduledTimerWithTimeInterval...的方式触发的timer，在滑动页面上的列表时，timer会暂定回调，为什么？如何解决？
+	Time加入的mode 优先级太低了，将这个timer加入到一个commonmode中
+
+23、[※※※※※]猜想runloop内部是如何实现的？
+	就老老实实 按照大牛写的说 但是具体说，还需要总结 整理一下
+
+24、[※]objc使用什么机制管理对象内存？
+	自动引用计数 ARC
+
+25、[※※※※]ARC通过什么方式帮助开发者管理内存？
+	引用计数，谁创建 谁管理，谁负责释放，强引用的时候引用计数retain，+1，不需要的时候release引用计数-1，引用计数为0 的时候 回收对象内存。
+
+26、[※※※※]不手动指定autoreleasepool的前提下，一个autorealese对象在什么时刻释放？（比如在一个vc的viewDidLoad中创建）
+	释放池drain的时候释放
+
+27、[※※※※]BAD_ACCESS在什么情况下出现？
+	野指针 数组越界
+
+28、[※※※※※]苹果是如何实现autoreleasepool的？
+	autoreleasepoolpage，将需要autoreleasepool的加入到autoreleasepoolPage中，然后压入栈。这个还不确定
+
+29、[※※]使用block时什么情况会发生引用循环，如何解决？
+	self强引用block block中又强引用self，就会发生引用循环
+	需要在block中更改的对象，需要经过__block,或者weak，转换成弱引用，避免引用循环。
+
+30、[※※]在block内如何修改block外部变量？
+	添加__block修饰该外部变量
+
+31、[※※※]使用系统的某些block api（如UIView的block版本写动画时），是否也考虑引用循环问题？
+	不需要吧？这个不确定。
+32、[※※]GCD的队列（dispatch_queue_t）分哪两种类型？
+	dispatch_global_queue 和 dispatch_main_queue
+
+33、[※※※※]如何用GCD同步若干个异步调用？（如根据若干个url异步加载多张图片，然后在都下载完成后合成一张整图）
+	用dispatch_group,会等grou执行完之后，再执行后面的。
+
+34、[※※※※]dispatch_barrier_async的作用是什么？
+	栅栏 栅栏要等栅栏前面的执行完了才执行栅栏，栅栏里面完全执行完了，再执行栅栏后面的，栅栏里面可同步 可异步，这个是异步执行栅栏里面的。
+
+35、[※※※※※]苹果为什么要废弃dispatch_get_current_queue？
+
+36、[※※※※※]以下代码运行结果如何？
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    NSLog(@"1");
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        NSLog(@"2");
+    });
+    NSLog(@"3");
+}
+
+37、[※※]addObserver:forKeyPath:options:context:各个参数的作用分别是什么，observer中需要实现哪个方法才能获得KVO回调？
+
+38、[※※※]如何手动触发一个value的KVO
+
+39、[※※※]若一个类有实例变量NSString *_foo，调用setValue:forKey:时，可以以foo还是_foo作为key？
+
+40、[※※※※]KVC的keyPath中的集合运算符如何使用？
+
+41、[※※※※]KVC和KVO的keyPath一定是属性么？
+
+42、[※※※※※]如何关闭默认的KVO的默认实现，并进入自定义的KVO实现？
+
+43、[※※※※※]apple用什么方式实现对一个对象的KVO？
+
+44、[※※]IBOutlet连出来的视图属性为什么可以被设置成weak?
+
+45、[※※※※※]IB中User Defined Runtime Attributes如何使用？
+
+46、[※※※]如何调试BAD_ACCESS错误
+
+47、[※※※]lldb（gdb）常用的调试命令？
+	watch point、 p、 po、
+
+
 1、objc中向nil发送消息，是安全的 不会崩溃。
 
 3月13日
@@ -55,8 +222,6 @@ h.不管是MVC 还是MVVP 。业务逻辑放在业务逻辑应该的地方，比
 根据这个 带着这个去学习：
 http://blog.sunnyxx.com/2015/07/04/ios-interview/
 
-生活苦难 你才更要努力学习 努力做好自己 把自己变得更好一点 更强一点
-
 1、@property 后面可以有哪些修饰符？
 	noatomic/atomic strong/weak/assign/copy 指定setter getter 
 
@@ -74,7 +239,7 @@ NSString用copy，经常用copy的特质来保护其封装性，NSString NSDicti
 
 在 MRC 中,方法内部的 block 是在栈区的,使用 copy 可以把它放到堆区.在 ARC 中写不写都行。
 
-没有解决
+
 4、这个写法会出什么问题： @property (copy) NSMutableArray *array;
 	将NSMutableArray 声明成了copy修饰的特性的 类的实例 对NSMutableArray 类型的array 不是拥有的关系。
 是又拷贝了一份 又用一个指针指向现在拷贝的这一份拷贝，拷贝的这一份是NSArrya，就会出现 之前那个指针指向的再去操作 就会被释放了 或者 数据不一致？？这个回答可以吗？准确不？不对 要说到 copy的是一个不可变的NSarray，所以，是不能记性操作的。
@@ -92,8 +257,7 @@ self.mutableArray = array;   //这里set方法，是copy了一个不可变的NSA
 [self.mutableArray removeObjectAtIndex:0];
 
 
-
-没有解决 
+ 
 5、如何让自己的类用 copy 修饰符？如何重写带 copy 关键字的 setter？
 	copy修饰的属性的setter方法的实现 MRC的实现方式？??
 	@property（atomic,copy）NSString * stringC;
@@ -186,10 +350,6 @@ runtime 对注册的类， 会进行布局，对于 weak 对象会放入一个 h
 weak修饰的指针 是有默认的值的 默认的nil，也就是初始的值是nil
 
 
-
-今天就告一段落 弄好这8个问题 把这8个问题在源码中找到答案
-
-今天就先告一段落 有点累了 先看看下面的问题 看看其他的
 有关元类的：
 元类里面存着类方法列表 给类发消息 会通过这个类isa到元类的方法列表里取查找方法。
 当我们发送一个消息给一个NSObject对象时，这条消息会在对象的类对象方法列表里查找
