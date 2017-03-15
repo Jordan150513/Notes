@@ -111,7 +111,101 @@
 	这一步是Runtime最后一次给你挽救的机会。首先它会发送-methodSignatureForSelector:消息获得函数的参数和返回值类型。如	果-methodSignatureForSelector:返回nil，Runtime则会发出-doesNotRecognizeSelector:消息，程序这时也就挂掉了。如	果返回了一个函数签名，Runtime就会创建一个NSInvocation对象并发送-forwardInvocation:消息给目标对象。
 
 11、[※※※※]一个objc对象如何进行内存布局？（考虑有父类的情况）
-	这个确实不知道，
+	这个确实不知道，其实是知道的，要自己好好整理一下
+
+	参照instance class metaclass的图 显示了isa的关系和继承的关系
+	1）所有父类的成员变量和自己的成员变量都会存储在该 实例对象 的存储空间之中
+	2）每一个对象的内部都有一个isa指针，实例对象存的是指向其类的指针，类对象存的是指向其元类的指针。
+	  类对象中存放着本身对象的	
+	a,对象方法列表（对象能够接收的消息列表，保存在它所对应的类对象中）
+	b,成员变量的列表。
+	c,属性列表。
+	类对象内也有一个isa指针指向元对象（meta class），元对象内部存放的是类方法列表，类对象内部还有一个superclass的指针，指向他的父类对象
+
+见源码 runtime.h中有定义：
+
+// 假的，真正的实现见 objc-runtime-new
+struct objc_class {
+    Class isa  OBJC_ISA_AVAILABILITY;
+
+#if !__OBJC2__
+    Class super_class                                        OBJC2_UNAVAILABLE;
+    const char *name                                         OBJC2_UNAVAILABLE;
+    long version                                             OBJC2_UNAVAILABLE;
+    long info                                                OBJC2_UNAVAILABLE;
+    long instance_size                                       OBJC2_UNAVAILABLE;
+    struct objc_ivar_list *ivars                             OBJC2_UNAVAILABLE;
+    struct objc_method_list **methodLists                    OBJC2_UNAVAILABLE;
+    struct objc_cache *cache                                 OBJC2_UNAVAILABLE;
+    struct objc_protocol_list *protocols                     OBJC2_UNAVAILABLE;
+#endif
+
+} OBJC2_UNAVAILABLE;
+
+
+根据源码 才能说话 别只会看别人的分析，
+每一个NSObject对象都是objc_class类型的
+1、objc_class类里面有superclass的指针 指明继承关系
+2、缓存 缓存了SEL和IMP的对应关系，发送消息的时候 先来缓存里找，然后再去方法列表里面找
+3、还有一个标志的变量 bits 里面存了各种的标志信息
+
+objc-runtime-new中真正的定义：
+
+struct objc_class : objc_object {
+//    Class ISA;    // 别疑惑，确实是被apple注释了。
+                    // 原来是用来存储元类信息的，但是现在不是了，因为 objc_class 继承自 objc_object
+                    // 元类（也就是类的类型）被存在了 objc_object 中的 isa_t isa 结构体中
+    Class superclass; // 指向当前类的父类
+    cache_t cache;    // cache 缓存 sel 和 imp 的对应关系，加速方法的调用  // formerly cache pointer and vtable
+    class_data_bits_t bits; // class_rw_t * plus custom rr/alloc flags
+                        // 存储类的方法、属性、遵循的协议等信息，注意是值类型的
+                        // objc_class 中对 class_data_bits_t 中的很多方法重新做了封装
+                        // 对外界隐藏了 class_data_bits_t
+
+    // 取得 bits 中存的 data，就是 class_data_bits_t 里的 bits 中的 data 部分
+    // 在 realized 之前，data 存的是 ro，用的时候需要强转为 class_ro_t
+    // 在 realized 之后，存的才是 rw
+    class_rw_t *data() { 
+        return bits.data();
+    }
+    
+    // 设置 bits 中的 data 部分
+    void setData(class_rw_t *newData) {
+        bits.setData(newData);
+    }
+
+    // 设置 bits 中的 class_rw_t 结构体中存的 flag
+    // 本质上是按位或，将指定的位置变为 1
+    void setInfo(uint32_t set) {
+        // 既没有 realized ，又没有 future ，说明 class 还没有准备好，后面的操作都做不了
+        assert(isFuture()  ||  isRealized());
+        data()->setFlags(set);
+    }
+
+    // 清空 bits 中的 class_rw_t 结构体中存的 flag
+    // 本质上是按位异或，将指定的位置变为 0
+    void clearInfo(uint32_t clear) {
+        assert(isFuture()  ||  isRealized());
+        data()->clearFlags(clear);
+    }
+
+    // set and clear must not overlap （不能重叠）
+    // 既 set 又 clear，按位或和按位异或一起做，但是更新的位置不能重叠，不然就有歧义了
+    void changeInfo(uint32_t set, uint32_t clear) {
+        assert(isFuture()  ||  isRealized());
+        assert((set & clear) == 0);
+        data()->changeFlags(set, clear);
+    }
+}
+//objc_class 定义结束 太多了 类里面 太多东西了 只取一些重要的说吧
+
+
+
+
+
+
+
+
 
 12、[※※※※]一个objc对象的isa的指针指向什么？有什么作用？
 	实例对象的isa指向它的类，类对象的isa指向其元类
@@ -133,8 +227,20 @@
 	TestDemo[541:332834] Son
 	TestDemo[541:332834] Son
 	这个应该怎么解释调用过程呢？？？
+	iOS子类中调用[super class]为何会输出子类类型？
+	对方法的调用是通过发送消息来完成的。
+	1）也就是说使用 [self class] 时，会使用obj_msgSend（id theReceiver, SEL selector, ...）函数向Receiver来发送消息。
+	而使用 [super class] 时，会使用obj_msgsendSuper(...)函数向Receiver来发送消息。
+Receiver 都是当前的子类self son，所以
+	2). [self class]和[super class]都会找到 NSObject中class方法
+
+	3). 当[super class]找到NSObject中的class方法以后，仍然会使用obj_msgSend(receiver, @selector(class))函数，因为receiver不变，所以输出的结果仍旧是DetailViewController
+	[super class]找到NSObject中class方法以后，reciever不变实际上是因为
+	super只是一个“编译器指示符”，它和self指向的是相同的receiver。
+
 
 14、[※※※※]runtime如何通过selector找到对应的IMP地址？（分别考虑类方法和实例方法）
+	selector的本质就是一个字符串，方法列表中存储着方法的名字，方法的实现IMP，方法的参数列表。
 	类方法：
 	会通过类的isa指针到类的元类中的方法表(method_list中进行)查找，在method_list中存储的方法结构体中有IMP指针
 
@@ -142,6 +248,47 @@
 	会通过selector到实例对象isa指向的类方法表（method_list）中寻找对应的方法，映射对 key-value 找到对应的方法结构体重有IMP指针
 
 	这个需要到源码中找到相应的源码
+	
+	在寻找IMP的时候有两个主要的方法
+	IMP class_getMethodImplementation(Class cls, SEL name);
+	IMP method_getImplementation(Method m)
+	
+	objc-class.mm文件中实现
+	/***********************************************************************
+ 	* object_getMethodImplementation.
+ 	**********************************************************************/
+	//  取得 obj 对象中的指定 SEL 对应的方法的函数指针
+	// 这个寻找IMP的是在哪里调用的？？
+//在NSObject.mm + (IMP)methodForSelector:(SEL)sel 和 + (IMP)methodForSelector:(SEL)sel  中调用
+// objc-weak中也有调用
+
+IMP object_getMethodImplementation(id obj, SEL name)
+{
+    // 先取 obj 对象的类，
+    // 如果 obj 对象是 nil，那么类也是 nil，class_getMethodImplementation 返回的也是 nil
+    Class cls = (obj ? obj->getIsa() : nil);
+    // 然后调用 class_getMethodImplementation 函数从 cls 类中查找指定的 SEL
+    return class_getMethodImplementation(cls, name);
+}
+
+在NSObject.mm中调用
++ (IMP)methodForSelector:(SEL)sel {
+    if (!sel) [self doesNotRecognizeSelector:sel];
+    return object_getMethodImplementation((id)self, sel);
+}
+
+// 通过 sel 找到对应的方法实现的函数指针
+- (IMP)methodForSelector:(SEL)sel {
+    if (!sel) [self doesNotRecognizeSelector:sel];
+    return object_getMethodImplementation(self, sel);
+}
+
+struct objc_method {
+    SEL method_name                                      
+    char *method_types                                       
+    IMP method_imp                                           
+}
+objc_method 结构体中有IMP 指针
 
 15、[※※※※]使用runtime Associate方法关联的对象，需要在主对象dealloc的时候释放么？
 	不需要，会在对象销毁的时候，会移除关联的对象，就被释放掉了。
@@ -149,6 +296,10 @@
 16、[※※※※※]objc中的类方法和实例方法有什么本质区别和联系？
 	类方法存储在元类中的方法列表里，通过类的isa到元类的方法列表里取查找
 	实例方法存储在类的方法列表里，通过实例的isa到类的方法列表里去查找
+
+	1，类方法是属于类对象的 2，类方法只能通过类对象调用 3，类方法中的self是类对象 4,类方法中不能访问成员变量 5，类方法可以调用其他的类方法 6，类方法中不能直接调用对象方法
+
+	1，实例方法是属于实例对象的 2，实例方法只能通过实例对象调用，3，实例方法中的self是实例对象 4，实例方法中可以访问成员变量 5，实例方法中直接调用实例方法6，实例方法中可以直接调用类方法(通过类名)
 
 17、[※※※※※]_objc_msgForward函数是做什么的，直接调用它将会发生什么？
 	消息转发，当前对象的方法列表里，没有对应的方法（发送的消息），就会调用。。。。后面就又不清楚了。不仅要清楚实现过程，还需要清楚源码的实现。
