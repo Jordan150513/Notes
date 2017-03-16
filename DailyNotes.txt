@@ -249,7 +249,7 @@ Receiver 都是当前的子类self son，所以
 
 	这个需要到源码中找到相应的源码
 	
-	在寻找IMP的时候有两个主要的方法
+	在寻找IMP的时候有两个主要的方法 参见TestIMP Demo
 	IMP class_getMethodImplementation(Class cls, SEL name);
 	IMP method_getImplementation(Method m)
 	
@@ -303,12 +303,40 @@ objc_method 结构体中有IMP 指针
 
 17、[※※※※※]_objc_msgForward函数是做什么的，直接调用它将会发生什么？
 	消息转发，当前对象的方法列表里，没有对应的方法（发送的消息），就会调用。。。。后面就又不清楚了。不仅要清楚实现过程，还需要清楚源码的实现。
+	当对象没有实现某个方法 ，会调用这个函数进行方法转发。（某方法对应的IMP没找到，会返回这个函数的IMP去执行）
+消息转发的步骤：
+1.调用resolveInstanceMethod:方法，允许用户在此时为该Class动态添加实现。如果有实现了，则调用并返回。如果仍没实现，继续下面的动作。
+
+2.调用forwardingTargetForSelector:方法，尝试找到一个能响应该消息的对象。如果获取到，则直接转发给它。如果返回了nil，继续下面的动作。
+
+3.调用methodSignatureForSelector:方法，尝试获得一个方法签名。如果获取不到，则直接调用doesNotRecognizeSelector抛出异常。
+
+4.调用forwardInvocation:方法，将地3步获取到的方法签名包装成Invocation传入，如何处理就在这里面了。
+
+如果直接调用这个方法，就算实现了想调用的方法，也不会被调用，会直接走消息转发步骤。
+
+
 
 18、[※※※※※]runtime如何实现weak变量的自动置nil？
 	那个方法叫什么来这 weak_clean_nolock（）
 
+	runtime 对注册的类， 会进行布局，对于 weak 对象会放入一个 hash 表中。 用 weak 指向的对象内存地址作为 key，当此对象的引用计数为0的时候会 dealloc，假如 weak 指向的对象内存地址是a，那么就会以a为键， 在这个 weak 表中搜索，找到所有以a为键的 weak 对象，从而设置为 nil。
+
 19、[※※※※※]能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
 	不能向编译后得到的类中增加实例变量，但是可以向运行的类中，动态的增加属性，但是增加不了实例变量。
+
+不能向编译后得到的类中增加实例变量；
+能向运行时创建的类中添加实例变量；
+
+原因如下：
+
+因为编译后的类已经注册在 runtime 中，类结构体中的 objc_ivar_list 实例变量的链表 和 instance_size 实例变量的内存大小已经确定，同时runtime 会调用 class_setIvarLayout 或 class_setWeakIvarLayout 来处理 strong weak 引用。所以不能向存在的类中添加实例变量；
+
+运行时创建的类是可以添加实例变量，调用 class_addIvar 函数。但是得在调用 objc_allocateClassPair 之后，objc_registerClassPair 之前，原因同上。
+
+向运行时创建的类中添加实例变量的demo————见demo————
+
+另 牵涉出 runtime动态创建类、添加方法、添加实例变量
 
 20、[※※※]runloop和线程有什么关系？
 	一一对应的关系
