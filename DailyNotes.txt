@@ -1,5 +1,76 @@
 每天一个问题
 
+3月16日
+
+28、[※※※※※]苹果是如何实现autoreleasepool的？
+	autoreleasepoolpage，将需要autoreleasepool的加入到autoreleasepoolPage中，然后压入栈。这个还不确定
+
+29、[※※]使用block时什么情况会发生引用循环，如何解决？
+	self强引用block block中又强引用self，就会发生引用循环
+	需要在block中更改的对象，需要经过__block,或者weak，转换成弱引用，避免引用循环。
+
+30、[※※]在block内如何修改block外部变量？
+	添加__block修饰该外部变量
+
+31、[※※※]使用系统的某些block api（如UIView的block版本写动画时），是否也考虑引用循环问题？
+	不需要吧？这个不确定。
+32、[※※]GCD的队列（dispatch_queue_t）分哪两种类型？
+	dispatch_global_queue 和 dispatch_main_queue
+
+33、[※※※※]如何用GCD同步若干个异步调用？（如根据若干个url异步加载多张图片，然后在都下载完成后合成一张整图）
+	用dispatch_group,会等grou执行完之后，再执行后面的。
+
+34、[※※※※]dispatch_barrier_async的作用是什么？
+	栅栏 栅栏要等栅栏前面的执行完了才执行栅栏，栅栏里面完全执行完了，再执行栅栏后面的，栅栏里面可同步 可异步，这个是异步执行栅栏里面的。
+
+35、[※※※※※]苹果为什么要废弃dispatch_get_current_queue？
+
+36、[※※※※※]以下代码运行结果如何？
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    NSLog(@"1");
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        NSLog(@"2");
+    });
+    NSLog(@"3");
+}
+我亲测运行报错了，这是为啥？？？
+
+
+37、[※※]addObserver:forKeyPath:options:context:各个参数的作用分别是什么，observer中需要实现哪个方法才能获得KVO回调？
+   addObserver:<#(nonnull NSObject *)#> forKeyPath:<#(nonnull NSString *)#> options:<#(NSKeyValueObservingOptions)#> context:<#(nullable void *)#>]
+    第一个参数：指明是给谁添加观察者
+    第二个参数： <#(nonnull NSString *)#> 指明keypath
+    第三个参数：NSKeyValueObservingOptions 有三个枚举值 initial new old
+    第四个参数： <#(nullable void *)#> context
+    context:需要传递的对象是一个(void *)类型的数据，这是一个C类型的对象，我们需要做的就是将id类型的对象转成C类型。
+观察者模式：
+
+
+38、[※※※]如何手动触发一个value的KVO
+
+39、[※※※]若一个类有实例变量NSString *_foo，调用setValue:forKey:时，可以以foo还是_foo作为key？
+
+40、[※※※※]KVC的keyPath中的集合运算符如何使用？
+
+41、[※※※※]KVC和KVO的keyPath一定是属性么？
+
+42、[※※※※※]如何关闭默认的KVO的默认实现，并进入自定义的KVO实现？
+
+43、[※※※※※]apple用什么方式实现对一个对象的KVO？
+
+44、[※※]IBOutlet连出来的视图属性为什么可以被设置成weak?
+
+45、[※※※※※]IB中User Defined Runtime Attributes如何使用？
+
+46、[※※※]如何调试BAD_ACCESS错误
+
+47、[※※※]lldb（gdb）常用的调试命令？
+	watch point、 p、 po、
+
+
+
 3月14日
 
 添加了观察者 但是没有触发观察者的方法，为什么会这样的？原因是啥？
@@ -297,9 +368,19 @@ objc_method 结构体中有IMP 指针
 	类方法存储在元类中的方法列表里，通过类的isa到元类的方法列表里取查找
 	实例方法存储在类的方法列表里，通过实例的isa到类的方法列表里去查找
 
-	1，类方法是属于类对象的 2，类方法只能通过类对象调用 3，类方法中的self是类对象 4,类方法中不能访问成员变量 5，类方法可以调用其他的类方法 6，类方法中不能直接调用对象方法
+	1，类方法是属于类对象的 
+	2，类方法只能通过类对象调用 
+	3，类方法中的self是类对象 
+	4,类方法中不能访问成员变量 
+	5，类方法可以调用其他的类方法 
+	6，类方法中不能直接调用对象方法
 
-	1，实例方法是属于实例对象的 2，实例方法只能通过实例对象调用，3，实例方法中的self是实例对象 4，实例方法中可以访问成员变量 5，实例方法中直接调用实例方法6，实例方法中可以直接调用类方法(通过类名)
+	1，实例方法是属于实例对象的 
+	2，实例方法只能通过实例对象调用，
+	3，实例方法中的self是实例对象 
+	4，实例方法中可以访问成员变量 
+	5，实例方法中直接调用实例方法
+	6，实例方法中可以直接调用类方法(通过类名)
 
 17、[※※※※※]_objc_msgForward函数是做什么的，直接调用它将会发生什么？
 	消息转发，当前对象的方法列表里，没有对应的方法（发送的消息），就会调用。。。。后面就又不清楚了。不仅要清楚实现过程，还需要清楚源码的实现。
@@ -323,7 +404,7 @@ objc_method 结构体中有IMP 指针
 	runtime 对注册的类， 会进行布局，对于 weak 对象会放入一个 hash 表中。 用 weak 指向的对象内存地址作为 key，当此对象的引用计数为0的时候会 dealloc，假如 weak 指向的对象内存地址是a，那么就会以a为键， 在这个 weak 表中搜索，找到所有以a为键的 weak 对象，从而设置为 nil。
 
 19、[※※※※※]能否向编译后得到的类中增加实例变量？能否向运行时创建的类中添加实例变量？为什么？
-	不能向编译后得到的类中增加实例变量，但是可以向运行的类中，动态的增加属性，但是增加不了实例变量。
+	不能向编译后得到的类中增加实例变量，但是可以向运行时创建的类中，动态的增加属性，但是增加不了实例变量。
 
 不能向编译后得到的类中增加实例变量；
 能向运行时创建的类中添加实例变量；
@@ -339,7 +420,12 @@ objc_method 结构体中有IMP 指针
 另 牵涉出 runtime动态创建类、添加方法、添加实例变量
 
 20、[※※※]runloop和线程有什么关系？
-	一一对应的关系
+	一一对应的关系 只说一个一一对应，开玩笑呢 相当于啥都没有说。
+	每个线程，包括程序的主线程（main thread）都有与之相应的run loop对象。
+	runloop和线程的关系：
+	主线程的run loop默认是启动的, 子线程的runloop默认是不开启的,需要我们自己手动开启循环; 
+程序启动后会有一个如下的main()函数 启动主循环，会为main thread设置一个NSRunLoop对象，这就解释了：为什么我们的应用可以在无人操作的时候休息，需要让它干活的时候又能立马响应。
+runloop执行完毕之后,就会进入休眠 , 只有在某个情况下触发了,才会再次调用;
 
 21、[※※※]runloop的mode作用是什么？
 	
@@ -350,83 +436,37 @@ objc_method 结构体中有IMP 指针
 	就老老实实 按照大牛写的说 但是具体说，还需要总结 整理一下
 
 24、[※]objc使用什么机制管理对象内存？
-	自动引用计数 ARC
+	自动引用计数 ARC 之前用MRC java是垃圾回收机制，iOS没有垃圾回收机制
 
 25、[※※※※]ARC通过什么方式帮助开发者管理内存？
 	引用计数，谁创建 谁管理，谁负责释放，强引用的时候引用计数retain，+1，不需要的时候release引用计数-1，引用计数为0 的时候 回收对象内存。
+	在编译期，ARC用的是更底层的C接口实现的retain/release/autorelease，这样做性能更好，也是为什么不能在ARC环境下手动retain/release/autorelease，同时对同一上下文的同一对象的成对retain/release操作进行优化（即忽略掉不必要的操作）；
 
 26、[※※※※]不手动指定autoreleasepool的前提下，一个autorealese对象在什么时刻释放？（比如在一个vc的viewDidLoad中创建）
 	释放池drain的时候释放
 
+分两种情况：
+手动干预释放时机、系统自动去释放。
+
+1.手动干预释放时机--指定autoreleasepool 就是所谓的：当前作用域大括号结束时释放。
+系统自动去释放--不手动指定autoreleasepool
+2.Autorelease对象出了作用域之后，会被添加到最近一次创建的自动释放池中，并会在当前的 runloop 迭代结束时释放。
+
+ 所有 autorelease 的对象，在出了作用域之后，会被自动添加到最近创建的自动释放池中。
+ 在一次完整的运行循环结束之前，会被销毁。
+
+如果在一个vc的viewDidLoad中创建一个 Autorelease对象，那么该对象会在 viewDidAppear 方法执行前就被销毁了。
+在没有手加Autorelease Pool的情况下，Autorelease对象是在当前的runloop
+迭代结束时释放的，而它能够释放的原因是系统在每个runloop迭代中都加入了自动释放池Push和Pop
+
+http://www.jianshu.com/p/1ddd0603d7e1
+这个问题，这个博客讲解的不错
+
 27、[※※※※]BAD_ACCESS在什么情况下出现？
-	野指针 数组越界
+	访问野指针 对一个已经释放的对象执行了release、访问已经释放对象的成员变量或者发消息。
+	数组越界 ？test一下 不是 bad access 是NSRangeException 
+	死循环 不熟悉 没有遇到
 
-28、[※※※※※]苹果是如何实现autoreleasepool的？
-	autoreleasepoolpage，将需要autoreleasepool的加入到autoreleasepoolPage中，然后压入栈。这个还不确定
-
-29、[※※]使用block时什么情况会发生引用循环，如何解决？
-	self强引用block block中又强引用self，就会发生引用循环
-	需要在block中更改的对象，需要经过__block,或者weak，转换成弱引用，避免引用循环。
-
-30、[※※]在block内如何修改block外部变量？
-	添加__block修饰该外部变量
-
-31、[※※※]使用系统的某些block api（如UIView的block版本写动画时），是否也考虑引用循环问题？
-	不需要吧？这个不确定。
-32、[※※]GCD的队列（dispatch_queue_t）分哪两种类型？
-	dispatch_global_queue 和 dispatch_main_queue
-
-33、[※※※※]如何用GCD同步若干个异步调用？（如根据若干个url异步加载多张图片，然后在都下载完成后合成一张整图）
-	用dispatch_group,会等grou执行完之后，再执行后面的。
-
-34、[※※※※]dispatch_barrier_async的作用是什么？
-	栅栏 栅栏要等栅栏前面的执行完了才执行栅栏，栅栏里面完全执行完了，再执行栅栏后面的，栅栏里面可同步 可异步，这个是异步执行栅栏里面的。
-
-35、[※※※※※]苹果为什么要废弃dispatch_get_current_queue？
-
-36、[※※※※※]以下代码运行结果如何？
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    NSLog(@"1");
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        NSLog(@"2");
-    });
-    NSLog(@"3");
-}
-我亲测运行报错了，这是为啥？？？
-
-
-37、[※※]addObserver:forKeyPath:options:context:各个参数的作用分别是什么，observer中需要实现哪个方法才能获得KVO回调？
-   addObserver:<#(nonnull NSObject *)#> forKeyPath:<#(nonnull NSString *)#> options:<#(NSKeyValueObservingOptions)#> context:<#(nullable void *)#>]
-    第一个参数：指明是给谁添加观察者
-    第二个参数： <#(nonnull NSString *)#> 指明keypath
-    第三个参数：NSKeyValueObservingOptions 有三个枚举值 initial new old
-    第四个参数： <#(nullable void *)#> context
-    context:需要传递的对象是一个(void *)类型的数据，这是一个C类型的对象，我们需要做的就是将id类型的对象转成C类型。
-观察者模式：
-
-
-38、[※※※]如何手动触发一个value的KVO
-
-39、[※※※]若一个类有实例变量NSString *_foo，调用setValue:forKey:时，可以以foo还是_foo作为key？
-
-40、[※※※※]KVC的keyPath中的集合运算符如何使用？
-
-41、[※※※※]KVC和KVO的keyPath一定是属性么？
-
-42、[※※※※※]如何关闭默认的KVO的默认实现，并进入自定义的KVO实现？
-
-43、[※※※※※]apple用什么方式实现对一个对象的KVO？
-
-44、[※※]IBOutlet连出来的视图属性为什么可以被设置成weak?
-
-45、[※※※※※]IB中User Defined Runtime Attributes如何使用？
-
-46、[※※※]如何调试BAD_ACCESS错误
-
-47、[※※※]lldb（gdb）常用的调试命令？
-	watch point、 p、 po、
 
 
 1、objc中向nil发送消息，是安全的 不会崩溃。
