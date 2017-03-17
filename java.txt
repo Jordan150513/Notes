@@ -3,6 +3,12 @@ java
 继续：从Java APPlet开始继续
 http://www.runoob.com/java/java-applet-basics.html
 
+Java Applet 先不看 看了也不用
+开始Java 实例
+
+
+
+
 
 2017年3月16日
 
