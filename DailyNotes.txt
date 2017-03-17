@@ -1,6 +1,9 @@
 每天一个问题
 
 3月16日
+https://github.com/ChenYilong/iOSInterviewQuestions/blob/master/01《招聘一个靠谱的iOS》面试题参考答案/《招聘一个靠谱的iOS》面试题参考答案（下）.md#47-若一个类有实例变量-nsstring-_foo-调用setvalueforkey时可以以foo还是-_foo-作为key
+
+
 
 28、[※※※※※]苹果是如何实现autoreleasepool的？
 http://www.jianshu.com/p/1b66c4d47cd7
@@ -186,16 +189,75 @@ dispatch_group_t
 
 
 38、[※※※]如何手动触发一个value的KVO
+不用现成的KVO 用自己实现的KVO
+参照http://tech.glowing.com/cn/implement-kvo/
+
+手动触发的概念：
+自动触发是指类似的这种场景：
+在注册KVO之前设置一个初始值，
+注册之后设置一个不一样的值，就可以触发了。
+
+
+键值观察通知依赖于NSObject的两个方法：
+willChangeValueForKey：和didChangeValueForKey：。
+在一个被观察属性发生改变之前，willChangeValueForKey：一定会被调用，这就会记录旧的值。
+而当改变发生后，didChangeValueForKey：会被调用，
+继而objectServeValueForKey：ofObject：change：content：也会被调用。
+如果可以手动实现这些调用，就可以实现“手动触发”了。
+
+
 
 39、[※※※]若一个类有实例变量NSString *_foo，调用setValue:forKey:时，可以以foo还是_foo作为key？
+都可以。
+
 
 40、[※※※※]KVC的keyPath中的集合运算符如何使用？
 
+必须用在集合对象上或普通对象的集合属性上
+简单集合运算符有@avg， @count ， @max ， @min ，@sum，
+格式 @"@sum.age"或 @"集合属性.@max.age"
+
+
 41、[※※※※]KVC和KVO的keyPath一定是属性么？
+KVC 支持实例变量，KVO 只能手动支持 手动设定实例变量的KVO实现监听
 
 42、[※※※※※]如何关闭默认的KVO的默认实现，并进入自定义的KVO实现？
+参考
+http://tech.glowing.com/cn/implement-kvo/
+http://stackoverflow.com/questions/10042588/kvo-for-manually-implemented-properties/10042641#10042641
+
 
 43、[※※※※※]apple用什么方式实现对一个对象的KVO？
+
+KVO的实现原理：
+KVO是基于runtime机制实现的
+当某个类的属性对象
+第一次被观察
+时，系统就会在运行期
+动态
+地创建
+该类的一个派生类
+，在这个派生类中重写基类中任何被观察属性的setter 方法。派生类在被重写的setter方法内实现真正的
+通知机制
+
+如果原类为Person，那么生成的派生类名为
+NSKVONotifying_Person
+每个类对象中都有一个isa指针指向当前类，当一个类对象的第一次被观察，那么系统会偷偷将isa指针指向动态生成的派生类，从而在给被监控属性赋值时执行的是派生类的setter方法
+
+键值观察通知依赖于NSObject 的两个方法:
+willChangeValueForKey:
+和
+didChangevlueForKey:
+；在一个被观察属性发生改变之前，
+willChangeValueForKey:
+一定会被调用，这就 会记录旧的值。而当改变发生后，
+didChangeValueForKey:
+会被调用，继而
+observeValueForKey:ofObject:change:context:
+也会被调用。
+
+KVO的这套实现机制中苹果还偷偷重写了class方法，让我们误认为还是使用的当前类，从而达到隐藏生成的派生类
+见图 KVO原理
 
 44、[※※]IBOutlet连出来的视图属性为什么可以被设置成weak?
 
