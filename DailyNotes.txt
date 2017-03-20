@@ -157,7 +157,7 @@ dispatch_group_t
 	栅栏 栅栏要等栅栏前面的执行完了才执行栅栏，栅栏里面完全执行完了，再执行栅栏后面的，栅栏里面可同步 可异步，这个是异步执行栅栏里面的。
 
 35、[※※※※※]苹果为什么要废弃dispatch_get_current_queue？
-	好像是因为同步阻塞会导致死锁
+	好像是因为同步阻塞会导致死锁 不是的 具体的原因 参考这个
 参考： http://blog.csdn.net/yiyaaixuexi/article/details/17752925
 
 可重入，
@@ -228,7 +228,7 @@ http://stackoverflow.com/questions/10042588/kvo-for-manually-implemented-propert
 
 
 43、[※※※※※]apple用什么方式实现对一个对象的KVO？
-
+概括起来 就是偷梁换柱，用了另外一个新建的派生类，新建的派生类任何被观察的属性的get set方法是重写，在value改变的时候，进而实现了通知机制。
 KVO的实现原理：
 KVO是基于runtime机制实现的
 当某个类的属性对象
@@ -260,14 +260,115 @@ KVO的这套实现机制中苹果还偷偷重写了class方法，让我们误认
 见图 KVO原理
 
 44、[※※]IBOutlet连出来的视图属性为什么可以被设置成weak?
+	参考这个：http://stackoverflow.com/questions/7678469/should-iboutlets-be-strong-or-weak-under-arc
+	因为既然有外链那么视图在xib或者storyboard中肯定存在，视图已经对它有一个强引用了。
+不过这个回答漏了个重要知识，使用storyboard（xib不行）创建的vc，会有一个叫_topLevelObjectsToKeepAliveFromStoryboard的私有数组强引用所有top level的对象，所以这时即便outlet声明成weak也没关系
 
 45、[※※※※※]IB中User Defined Runtime Attributes如何使用？
+	参考这个：http://www.jianshu.com/p/2da5ac166e2b
 
 46、[※※※]如何调试BAD_ACCESS错误
+	BAD_ACCESS捕获功能：Address Sanitizer(食品防腐剂，消毒杀菌剂)，寻找调试BAD——ACCESS错误
+	在Product->Scheme->edit Scheme中 Allow Address Sanitizer
+	
+在Xcode中勾选这个就可以成功定位了
 
 47、[※※※]lldb（gdb）常用的调试命令？
 	watch point、 p、 po、
       watchpoint set v string_weak_
+
+参考：
+http://lldb.llvm.org/lldb-gdb.html
+https://developer.apple.com/library/content/technotes/tn2239/_index.html
+
+
+执行指令：
+Launch a process no arguments.
+(lldb) process launch
+(lldb) run
+(lldb) r
+
+Launch a process with arguments <args>.
+(lldb) process launch -- <args>
+(lldb) r <args>
+
+Launch a process for with arguments a.out 1 2 3 without having to supply the args every time.
+% lldb -- a.out 1 2 3
+(lldb) run
+...
+(lldb) run
+or:
+(lldb) settings set target.run-args 1 2 3
+(lldb) run
+...
+(lldb) run
+...
+
+
+断点指令：
+Set a breakpoint at all functions named main.
+(lldb) breakpoint set --name main
+(lldb) br s -n main
+(lldb) b main
+
+Set a breakpoint in file test.c at line 12.
+(lldb) breakpoint set --file test.c --line 12
+(lldb) br s -f test.c -l 12
+(lldb) b test.c:12
+
+这个非常实用啊
+Set a breakpoint at and object C function: -[NSString stringWithFormat:].
+(lldb) breakpoint set --name "-[NSString stringWithFormat:]"
+(lldb) b -[NSString stringWithFormat:]
+
+List all breakpoints.
+(lldb) breakpoint list
+(lldb) br l
+
+监测点指令：
+Set a watchpoint on a variable when it is written to.
+(lldb) watchpoint set variable global_var
+(lldb) wa s v global_var
+
+watchpoint set v string_weak_
+
+Set a watchpoint on a memory location when it is written into. The size of the region to watch for defaults to the pointer size if no '-x byte_size' is specified. This command takes raw input, evaluated as an expression returning an unsigned integer pointing to the start of the region, after the '--' option terminator.
+(lldb) watchpoint set expression -- my_ptr
+(lldb) wa s e -- my_ptr
+
+Set a condition on a watchpoint.
+(lldb) watch set var global
+(lldb) watchpoint modify -c '(global==5)'
+(lldb) c
+...
+(lldb) bt
+* thread #1: tid = 0x1c03, 0x0000000100000ef5 a.out`modify + 21 at main.cpp:16, stop reason = watchpoint 1
+frame #0: 0x0000000100000ef5 a.out`modify + 21 at main.cpp:16
+frame #1: 0x0000000100000eac a.out`main + 108 at main.cpp:25
+frame #2: 0x00007fff8ac9c7e1 libdyld.dylib`start + 1
+(lldb) frame var global
+(int32_t) global = 5
+
+List all watchpoints.
+(lldb) watchpoint list
+(lldb) watch l
+
+检查点：
+
+运算表达式：
+
+检查线程状态指令：
+
+可执行并且共享库的状态的指令：
+
+MISCELLANEOUS各种各样的：？
+
+这里咋没有说： 
+po和p呢？
+
+不知道还漏掉了什么
+
+
 
 
 
