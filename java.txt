@@ -1,4 +1,13 @@
 java 
+
+2017年3月20日
+java通信变成socket的demo
+
+
+
+javac编译java文件之后，java执行该文件，提示找不到这个文件类，是因为有包的归属问题，删除包归属就可以了。
+
+
 2017年3月17日
 继续：从Java APPlet开始继续
 http://www.runoob.com/java/java-applet-basics.html
