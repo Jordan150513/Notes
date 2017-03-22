@@ -1,5 +1,67 @@
 java 
 
+
+
+
+2017年3月22日
+
+问题：
+1、<!—  http-equiv="Content-Type" 和 http-equiv="pragma" 有什么区别-->
+2、<!— content="text/html 和 content="no-cache" 有什么区别？ -->
+这是同一个问题 见上面 http-equiv= 和 content= 是相连的
+http-equiv的作用：
+
+meat标签的http-equiv属性语法格式是：
+＜meta http-equiv="参数" content="参数变量值"＞ ；其中http-equiv属性主要有以下几种参数：
+1、Expires(期限) 
+说明：可以用于设定网页的到期时间。一旦网页过期，必须到服务器上重新传输。 
+
+2、Pragma(cache模式) 
+说明：是用于设定禁止浏览器从本地机的缓存中调阅页面内容，设定后一旦离开网页就无法从Cache中再调出 
+
+注意：这样设定，访问者将无法脱机浏览。
+
+3、Refresh(刷新) 
+说明：自动刷新并指向新页面。 
+注意：其中的2是指停留2秒钟后自动刷新到URL网址。 
+
+4、Set-Cookie(cookie设定) 
+说明：如果网页过期，那么存盘的cookie将被删除。 
+
+注意：必须使用GMT的时间格式。 
+
+5、Window-target(显示窗口的设定) 
+说明：强制页面在当前窗口以独立页面显示。 
+
+注意：用来防止别人在框架里调用自己的页面。 
+
+6、content-Type(显示字符集的设定) 
+说明：设定页面使用的字符集。 
+
+7、Pics-label(网页等级评定) 
+
+
+8、Page_Enter、Page_Exit 
+设定进入页面时的特殊效果
+
+9、清除缓存（再访问这个网站要重新下载！） 
+
+10、设定网页的到期时间 
+
+11、关键字,给搜索引擎用的 
+
+
+12.页面描述 
+
+™多了 记住不了全部
+
+
+
+
+今天解决了java web项目上传github管理的问题
+github上创建一个空仓库，然后clone到本地的地址，本地的地址是在eclipse的workSpace里的一个新建的文件夹，这个文件夹的名字，就是一会在eclipse中新建项目的名字，这样就实现了workSpace里的项目 是一个git的仓库，的衔接。之前一直死板  没有解决这个问题，现在就可以把在家写的 和 在 公司写的java代码 统一在github的仓库中了，要坚持写，才会有收获。
+
+
 2017年3月20日
 java通信变成socket的demo
 
