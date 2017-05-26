@@ -1,0 +1,36 @@
+java笔记：
+
+2017年5月25日
+
+1、制定日期的年、月、日 加减1
+2、idea使用从github上clone的项目 的注意事项：
+
+idea中用import 项目 不能用open，导入项目之后，打开项目结构，
+然后将module一个一个加进来，就会识别了，并且会自动加载module的依赖。
+就解决了 导入问题，所有微服务都可以运行了。
+Zuul中用正则表达式 映射service name 和 路由的关系 
+正则表达式
+(?<name>^.+)-(?<version>v.+$)
+的解析
+
+(?<name>^.+)   -   (?<version>v.+$)
+分成两部分
+第一部分
+(?<name>^.+)
+(?   <name>   ^.+)
+
+第二部分：
+(?  <version>  v.+   $)
+
+a serviceId "myusers-v1" will be mapped to route "/v1/myusers/**"
+
+
++:
+
+.:
+
+^:
+
+?:
+
+
