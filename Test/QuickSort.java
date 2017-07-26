@@ -3,7 +3,7 @@ public class QuickSort{
 
 	public static void main(String args[]) throws IOException{
 		
-		// bug version
+		// 完成 考虑周全
 		System.out.println("quickSort:");
 
 		int[] dataArr = {5,2,67,3,56,78,22,5,9,90,12,545,66,87,8,5};
@@ -22,7 +22,7 @@ public class QuickSort{
 
 	public static void sort(int[] dataArr,int start,int end){
 		int p = start;
-		int i = start+1;
+		int i = start;
 		int j = end;
 		while(i<j){
 
@@ -31,7 +31,7 @@ public class QuickSort{
 				j--;
 			}
 
-			while (dataArr[i]>=dataArr[p]&&i<j) {
+			while (dataArr[i]<=dataArr[p]&&i<j) {
 				i++;
 			}
 
@@ -43,29 +43,26 @@ public class QuickSort{
 				j--;
 			}
 		}
-		if (i==j) {
-				int tmp = dataArr[i];
-				dataArr[i]= dataArr[p];
+		if (i>=j) {
+				int tmp = dataArr[j];
+				dataArr[j]= dataArr[p];
 				dataArr[p]=tmp;	
-				p=i;
-			if (start<p-1) {
+				p=j;
+			}
+		if (start<p-1) {
 				sort(dataArr,start,p-1);
 			}
 
-			if (p+1<end) {
+		if (p+1<end) {
 				sort(dataArr,p+1,end);
 			}
-		}
-		
-
-		
 
 	}
 
 	public static void printlnArr(int[] arr){
 			for (int k =0; k<arr.length;k++ ) {
 			System.out.print(arr[k]);
-			System.out.print(",");
+			System.out.println(" ");
 		}
 	}
 
