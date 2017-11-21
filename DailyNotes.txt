@@ -62,7 +62,8 @@ http://blog.sunnyxx.com/2015/07/04/ios-interview/
 2、什么情况使用 weak 关键字，相比 assign 有什么不同？
 	特点：weak和assign 既不保留新值，也不释放旧值
   	weak 关键字 非拥有关系 用来修饰NSObject对象 assign针对的是基本数据类型 NSInter Float等
-assign修饰的基本数据类型对象，在释放之后，并不会置为nil，但是基本数据类型是在栈中分配的存储空间，栈的空间管理，是由系统自行处理，释放或者分配，不会造成野指针。不会崩溃。weak修饰的对象是在堆上申请的，对象释放的时候，会被置为nil。如果没有被置为nil就是一个野指针，还指向堆中的某个地方，当下次用到堆中这个地址的时候，就会崩溃了，weak 在对象被释放之后，会置为nil，是安全的，不会造成野指针。不会引起崩溃。
+assign修饰的基本数据类型对象，在释放之后，并不会置为nil，但是基本数据类型是在栈中分配的存储空间，栈的空间管理，是由系统自行处理，释放或者分配，不会造成野指针。不会崩溃。
+weak修饰的对象是在堆上申请的，对象释放的时候，会被置为nil。如果没有被置为nil就是一个野指针，还指向堆中的某个地方，当下次用到堆中这个地址的时候，就会崩溃了，weak 在对象被释放之后，会置为nil，是安全的，不会造成野指针。不会引起崩溃。
 
 3、怎么用 copy 关键字？
 	是用来修饰NSString类型的 会使引用计数加1，
@@ -279,7 +280,7 @@ AsyncDisplayKit的原理 效果 其中有上段  说道 View 和 Layer的关系
 
 3月2日
 锁的应用的举例：
-非递归锁 再上锁之后再上锁，就会不能正常使用出错。递归锁 可以 层层递归上锁。
+非递归锁 在上锁之后再上锁，就会不能正常使用出错。递归锁 可以 层层递归上锁。
 1、代码源码上的例子
 类初始化的时候 +initialize，设计到对类的两个字段的更改，对类的 CLS_INITIALIZED 和 CLS_INITIALIZING 的修改，全局的 monitor_t类型的 classInitLock 锁就是用来同步对这两个字段的更改操作。保证其不会死锁。其他的线程都会等这个信号释放，只有这个信号释放了，才能做任何的消息发送，在初始化完成的信号释放之前，这些线程都会被挂起等待资源。
 
@@ -293,12 +294,13 @@ AsyncDisplayKit的原理 效果 其中有上段  说道 View 和 Layer的关系
 陌陌T：
 1、关联属性的生命周期问题
 什么时候被释放 什么时候被移除
-如果是copy的，那么在代码块执行完之后，就会被放入自动释放池中，会被释放掉 指针置为nil。当前所在的分类生命周期要结束的时候 会销毁这个分类的时候，这个分类所关联的 retain策略的属性将会被移除 然后被置为nil，释放。
+如果是copy的，那么在代码块执行完之后，就会被放入自动释放池中，会被释放掉 指针置为nil。
+当前所在的分类生命周期要结束的时候 会销毁这个分类的时候，这个分类所关联的 retain策略的属性将会被移除 然后被置为nil，释放。
 
 
 2、关联对象被存储在什么地方，是不是被存放在被关联对象本身的内存中
 
-不是存放在关联类的本身内存之后，是又开辟了一个内存，好像是一个关联对应表，用来存储关联的属性。
+不是存放在关联类的本身内存之后，是又开辟了一个内存，是一个关联对应表，用来存储关联的属性。
 
 
 
@@ -334,12 +336,12 @@ constant *：const在 * 的左边 是同一种情况 通过指针是不能改变
 https://gold.xitu.io/post/584fe4762f301e00573cafc6
 第二个关于 自动释放的原理 还没有掌握
 
-ARC（自动引用计数），无需我们自己显式持有（retain）和释放（release）对象，ARC通过对对像加上所有权修饰符（__strong等），编译器通过对象的所有权修饰符将会自动键入引用计数管理（根据所有权修饰符自动键入retain、release、autorelease）
+ARC（自动引用计数），无需我们自己显式在代码中去写 持有（retain）和释放（release）对象，ARC通过对对像加上所有权修饰符（__strong等），编译器通过对象的所有权修饰符将会自动键入引用计数管理（根据所有权修饰符自动键入retain、release、autorelease）
 
 把这段话copy进来是 要学会 如何去规范的表达一个问题的原因和答案 回答要规范正规化 不能太口头 随意。
 
 4、assign 和weak 的区别
-assign：用来修饰基本的数据类型，不会置为nil，可能会指向一个不明确的地址空间
+assign：用来修饰基本的数据类型，不会置为nil，可能会指向一个不明确的地址空间，但是assign修饰的基本数据类型是存在栈中的，栈中的空间的释放和分配是系统控制的，所以释放也是系统释放，所以会自动的释放。
 weak：用来修饰对象类型，若引用，当对象释放的时候，其属性也会置为nil，是安全的，不会有野指针，也就是不会指针指向一个不明确的地址空间
 
 
@@ -374,7 +376,8 @@ msd_send(receiver,selector)
 
 
 
-1、[super init]的作用超类完成自己的初始化工作
+1、[super init]的作用
+超类完成自己的初始化工作
 
 http://www.jianshu.com/p/9b36e1b636d8
 对于self ＝ [super init]的思考：
@@ -437,20 +440,172 @@ isKindOfClass和isMemberOfClass的区别：
 
 
 
-2、画圆，画圆角4+1（CC）=5中方式   第一种：使用drawRect方法绘图自定义一个View，在其drawRect方法中操作，尽量避免使用drawRect方法，会耗性能，资源浪费	- (void)drawRect:(CGRect)rect {//一个不透明类型的Quartz 2D绘画环境，相当于一个画布,你可以在上面任意绘画 //获取绘图上下文       CGContextRef context = UIGraphicsGetCurrentContext();设置各种字体颜色 格式最后用CGContextDrawPath方法，画在画布上   CGContextDrawImage画图片} 第二种：设置secondView.layer.cornerRadius = 50;    secondView.layer.masksToBounds = YES;     会引起离屏渲染第三种：使用贝塞尔曲线UIBezierPath和Core Graphics框架在图片的绘图上下文中画出一个透明的圆。增加CPU负担，增加内存开销    UIImageView *imageViewTwo = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];    imageViewTwo.image = [UIImage imageNamed:@"imageName1.jpg"];    //开始对imageView进行画图，在透明的这个imageView的画布上开始画    UIGraphicsBeginImageContextWithOptions(imageViewTwo.bounds.size, NO, [UIScreen mainScreen].scale);//    UIGraphicsBeginImageContextWithOptions(<#CGSize size#>, <#BOOL opaque#>, <#CGFloat scale#>)    //opaque：不透明    //使用贝塞尔曲线画出一个圆形图，并且切掉其他的，就剩下了透明的想要的那个圆    [[UIBezierPath bezierPathWithRoundedRect:imageViewTwo.bounds cornerRadius:imageViewTwo.frame.size.width] addClip];//    + (instancetype)bezierPathWithRoundedRect:(CGRect)rect cornerRadius:(CGFloat)cornerRadius;     //rounds all corners with the same horizontal and vertical radius    [imageViewTwo drawRect:imageViewTwo.bounds];        imageViewTwo.image = UIGraphicsGetImageFromCurrentImageContext();    //结束画图    UIGraphicsEndImageContext();    [self.view addSubview:imageViewTwo];          第四种：使用CAShapeLayer和UIBezierPath设置圆角，设置view.layer.mask同样会触发离屏渲染。    UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];    imageView.image = [UIImage imageNamed:@"imageName1.jpg"];        UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:imageView.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:imageView.bounds.size];        CAShapeLayer *maskLayer = [[CAShapeLayer alloc]init];    //设置大小    maskLayer.frame = imageView.bounds;    //设置图形样子    maskLayer.path = maskPath.CGPath;    imageView.layer.mask = maskLayer;        [self.view addSubview:imageView];第五种：CC的方法，addsubLayerUIImageView * imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 80, 80)];            [imageView setImage:[UIImage imageNamed:@"AppIcon60x60"]];            CAShapeLayer * layer = [CAShapeLayer layer];            UIBezierPath * path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 80, 80)];            UIBezierPath * circlePath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 80, 80)];            [path appendPath:circlePath];            [path setUsesEvenOddFillRule:YES];            [path addClip];            layer.path = path.CGPath;//            layer.fillColor = [UIColor whiteColor].CGColor;//改成跟北京色一致的            layer.fillColor = [UIColor colorWithRed:240/255.f green:240/255.f blue:240/255.f alpha:1].CGColor;            layer.fillRule = kCAFillRuleEvenOdd;            [imageView.layer addSublayer:layer];            [cell.contentView addSubview:imageView]; 第六种：混合两个imageView，遮盖下面的那个，形成圆角需要切图配合，更直接的，就直接让切图给一个圆角图就可以了。总结：尽量避免重写 drawRect 方法。不恰当的使用这个方法会导致内存暴增。举个例子，iPhone6 上与屏幕等大的 UIView，即使重写一个空的 drawRect 方法，它也至少占用 750 * 1134 * 4 字节 ≈ 3.4 Mb 的内存。在 内存恶鬼drawRect 及其后续中，作者详细介绍了其中原理，据他测试，在 iPhone6 上空的、与屏幕等大的视图重写 drawRect 方法会消耗 5.2 Mb 内存。总之，能避免重写 drawRect 方法就尽可能避免。最基础的一种UIView.layer.cornerRadiusmaskToBounse =yes设置 masksToBounds 会导致离屏渲染，出现性能降低 label 的四周出现了黄色的标记，说明这里出现了离屏渲染高效设置圆角为普通的 UIView设置圆角，和为 UIImageView 设置圆角的原理截然不同。有什么不同？离屏渲染：指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。iOS 9.0 之前UIimageView跟UIButton设置圆角都会触发离屏渲染iOS 9.0 之后UIButton设置圆角会触发离屏渲染，而UIImageView里png图片设置圆角不会触发离屏渲染了，如果设置其他阴影效果之类的还是会触发离屏渲染的。3、tabBar左右滑动的问题再由tabBar的页面左右，左右滑动的时候，有时候，tabbar不能跟着页面滑动？
-4、tableView加timer    什么情况下，timer不能正常的释放掉，什么可以使timer正常的释放掉。见YYFPSLabel的实现。
+2、画圆，画圆角4+1（CC）=5中方式
+   第一种：使用drawRect方法绘图
+自定义一个View，在其drawRect方法中操作，尽量避免使用drawRect方法，会耗性能，资源浪费
+	- (void)drawRect:(CGRect)rect {
+
+//一个不透明类型的Quartz 2D绘画环境，相当于一个画布,你可以在上面任意绘画 
+//获取绘图上下文
+       CGContextRef context = UIGraphicsGetCurrentContext();
+
+
+设置各种字体颜色 格式
+最后用CGContextDrawPath方法，画在画布上
+   CGContextDrawImage画图片
+} 
+
+
+第二种：设置secondView.layer.cornerRadius = 50;
+    secondView.layer.masksToBounds = YES;
+     会引起离屏渲染
+
+第三种：使用贝塞尔曲线UIBezierPath和Core Graphics框架在图片的绘图上下文中画出一个透明的圆。
+增加CPU负担，增加内存开销
+    UIImageView *imageViewTwo = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];
+    imageViewTwo.image = [UIImage imageNamed:@"imageName1.jpg"];
+    //开始对imageView进行画图，在透明的这个imageView的画布上开始画
+    UIGraphicsBeginImageContextWithOptions(imageViewTwo.bounds.size, NO, [UIScreen mainScreen].scale);
+//    UIGraphicsBeginImageContextWithOptions(<#CGSize size#>, <#BOOL opaque#>, <#CGFloat scale#>)
+    //opaque：不透明
+    //使用贝塞尔曲线画出一个圆形图，并且切掉其他的，就剩下了透明的想要的那个圆
+    [[UIBezierPath bezierPathWithRoundedRect:imageViewTwo.bounds cornerRadius:imageViewTwo.frame.size.width] addClip];
+//    + (instancetype)bezierPathWithRoundedRect:(CGRect)rect cornerRadius:(CGFloat)cornerRadius; 
+    //rounds all corners with the same horizontal and vertical radius
+    [imageViewTwo drawRect:imageViewTwo.bounds];
+    
+    imageViewTwo.image = UIGraphicsGetImageFromCurrentImageContext();
+    //结束画图
+    UIGraphicsEndImageContext();
+    [self.view addSubview:imageViewTwo];
+    
+    
+  第四种：使用CAShapeLayer和UIBezierPath设置圆角，设置view.layer.mask
+同样会触发离屏渲染。
+    UIImageView *imageView = [[UIImageView alloc]initWithFrame:CGRectMake(100, 100, 100, 100)];
+    imageView.image = [UIImage imageNamed:@"imageName1.jpg"];
+    
+    UIBezierPath *maskPath = [UIBezierPath bezierPathWithRoundedRect:imageView.bounds byRoundingCorners:UIRectCornerAllCorners cornerRadii:imageView.bounds.size];
+    
+    CAShapeLayer *maskLayer = [[CAShapeLayer alloc]init];
+    //设置大小
+    maskLayer.frame = imageView.bounds;
+    //设置图形样子
+    maskLayer.path = maskPath.CGPath;
+    imageView.layer.mask = maskLayer;
+    
+    [self.view addSubview:imageView];
+
+第五种：CC的方法，addsubLayer
+UIImageView * imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 80, 80)];
+            [imageView setImage:[UIImage imageNamed:@"AppIcon60x60"]];
+            CAShapeLayer * layer = [CAShapeLayer layer];
+            UIBezierPath * path = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, 80, 80)];
+            UIBezierPath * circlePath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 80, 80)];
+            [path appendPath:circlePath];
+            [path setUsesEvenOddFillRule:YES];
+            [path addClip];
+            layer.path = path.CGPath;
+//            layer.fillColor = [UIColor whiteColor].CGColor;//改成跟北京色一致的
+            layer.fillColor = [UIColor colorWithRed:240/255.f green:240/255.f blue:240/255.f alpha:1].CGColor;
+            layer.fillRule = kCAFillRuleEvenOdd;
+            [imageView.layer addSublayer:layer];
+            [cell.contentView addSubview:imageView];
+
+ 
+第六种：混合两个imageView，遮盖下面的那个，形成圆角
+需要切图配合，更直接的，就直接让切图给一个圆角图就可以了。
+
+总结：
+尽量避免重写 drawRect 方法。不恰当的使用这个方法会导致内存暴增。举个例子，iPhone6 上与屏幕等大的 UIView，即使重写一个空的 drawRect 方法，它也至少占用 750 * 1134 * 4 字节 ≈ 3.4 Mb 的内存。在 内存恶鬼drawRect 及其后续中，作者详细介绍了其中原理，据他测试，在 iPhone6 上空的、与屏幕等大的视图重写 drawRect 方法会消耗 5.2 Mb 内存。总之，能避免重写 drawRect 方法就尽可能避免。
+
+最基础的一种UIView.layer.cornerRadius
+maskToBounse =yes
+设置 masksToBounds 会导致离屏渲染，出现性能降低
+ label 的四周出现了黄色的标记，说明这里出现了离屏渲染
+
+高效设置圆角
+为普通的 UIView设置圆角，和为 UIImageView 设置圆角的原理截然不同。
+有什么不同？
+
+离屏渲染：
+指的是GPU在当前屏幕缓冲区以外新开辟一个缓冲区进行渲染操作。
+
+iOS 9.0 之前UIimageView跟UIButton设置圆角都会触发离屏渲染
+iOS 9.0 之后UIButton设置圆角会触发离屏渲染，而UIImageView里png图片设置圆角不会触发离屏渲染了，如果设置其他阴影效果之类的还是会触发离屏渲染的。
+
+
+
+
+
+
+3、tabBar左右滑动的问题
+再由tabBar的页面左右，左右滑动的时候，有时候，tabbar不能跟着页面滑动？
+4、tableView加timer
+    什么情况下，timer不能正常的释放掉，什么可以使timer正常的释放掉。见YYFPSLabel的实现。
 常见会有bug，tableview滚动会影响timer，tableview滚动的时候，咱阻塞timer，这说明timer添加到的RunLoop的mode不对，需要提高model的优先级，
 有三个mode：
 NSDefaultRunLoopMode - 标准优先级
 NSRunLoopCommonModes -这种解决方式是将 Timer 加入到顶层的 RunLoop 的 "commonModeItems" 中。"commonModeItems" 被 RunLoop 自动更新到所有具有"Common"属性的 Mode 里去。
 UITrackingRunLoopMode - 用于UIScrollView和别的控件的动画
-5、客户详情的右上角的聚合按钮6、keyWindow的问题见仿写iOS系统的浮动聚合按钮的demo？？8、mjrefresh实现9、ASI   AFN10、srwebsocket  内部实现   保活机制12、界面等比放大13、ARC 下 viewdidload 中定义的变量什么时候会释放14、数据库升级
-15、uicontrol   uiresponse16、block  为啥不能修改局部变量17、内存管理  strong weak18、自动释放池  三个，加到哪一个19、KVC   KVO21、static  22、http  和  https23、iOS目录结构24、framework   .a   静态库和动态库25、socket26、bitcode27、死锁产生的条件，怎么避免
-四个必要条件：
+5、客户详情的右上角的聚合按钮
+
+6、keyWindow的问题
+见仿写iOS系统的浮动聚合按钮的demo？？
+
+
+
+8、mjrefresh实现
+
+9、ASI   AFN
+
+10、srwebsocket  内部实现   保活机制
+
+12、界面等比放大
+
+13、ARC 下 viewdidload 中定义的变量什么时候会释放
+
+14、数据库升级
+15、uicontrol   uiresponse
+
+16、block  为啥不能修改局部变量
+
+17、内存管理  strong weak
+
+18、自动释放池  三个，加到哪一个
+
+19、KVC   KVO
+
+21、static  
+
+
+22、http  和  https
+
+
+
+23、iOS目录结构
+
+24、framework   .a   静态库和动态库
+
+25、socket
+
+26、bitcode
+
+
+
+
+
+27、死锁产生的条件，怎么避免
+四个必要条件：
 1、互斥条件    
 2、请求与保持   
 3、不剥夺条件    
-4、循环等待条件28、TCP和UDP
+4、循环等待条件
+
+
+
+
+28、TCP和UDP
 
 tcp协议和udp协议的差别 
 
@@ -482,7 +637,17 @@ UDP层是什么层的协议，数据报
 
 
 
-29、userdefault  存储的数据能通过物理路径找到吗31、深入理解RunLoop32、深入理解GCD
+
+29、userdefault  存储的数据能通过物理路径找到吗
+
+31、深入理解RunLoop
+
+
+
+
+
+
+32、深入理解GCD
 见GCDNotes.txt里面包括了1和2
 
 3：dispatch source
@@ -491,14 +656,15 @@ UDP层是什么层的协议，数据报
 
 
 
-33、定时帧NSTimer和CADisplayLink
+33、定时帧NSTimer和CADisplayLink
 见博客http://www.cnblogs.com/Jordandan/p/6197273.html
 定时帧
 
 
 
 
-30、获取帧率见YYFPSLabel的实现，博客的记录
+30、获取帧率
+见YYFPSLabel的实现，博客的记录
 
 
 
@@ -635,7 +801,7 @@ __weak只能在ARC模式下使用，也只能修饰对象（NSString），不能
 __block对象可以在block中被重新赋值，__weak不可以。
 
 
-36、分类和扩展：
+36、分类和扩展：
 扩展是无名分类，
 扩展里面的属性，是私有的，子类也访问不了。
 能为某个类附加额外的属性，成员变量，方法声明
@@ -648,7 +814,8 @@ __block对象可以在block中被重新赋值，__weak不可以。
 如果分类中声明了一个属性，那么分类只会生成这个属性的set、get方法声明，也就是不会有实现。
 但是扩展不可以？？？不可以什么？？？不可以生成属性的set get方法,不可以添加属性和成员变量
 
-37、Charles实现对Https进行抓包，使用的原理就是中间人技术（man-in-the-middle）中间人技术（man-in-the-middle）：
+37、Charles实现对Https进行抓包，使用的原理就是中间人技术（man-in-the-middle）
+中间人技术（man-in-the-middle）：
 
 38、
 NSURLSession总结：
